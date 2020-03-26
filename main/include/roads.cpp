@@ -58,8 +58,12 @@ int DFSTracePathPoints::GetAllPathPoints()
 DFSTracePathPoints::DFSTracePathPoints(const GameState & parent, int _pID) :
 	pGameState(parent), roads(*pGameState.roads), buildings(*pGameState.buildings)
 {
-	if (_pID < 0)
+	if (_pID < 0) {
 		pID = pGameState.GetCurrentPlayer();
+	}
+	else {
+		pID = _pID;
+	}
 	GetAllPathPoints();
 	//pID = _pID;
 	//GetExtremePoints();
@@ -174,7 +178,8 @@ bool DFSTracePathPoints::IsItPossibleToBuildRoad(int from, int to)
 
 			//we can not build road from the point with enemy set/city		
 			int buildingId = buildings.IsBuildingExists(point);
-			if ((buildingId >= 0) && (buildingId != pGameState.GetCurrentPlayer())) {
+			//if ((buildingId >= 0) && (buildingId != pGameState.GetCurrentPlayer())) {
+			if ((buildingId >= 0) && (buildingId != pID)) {
 				//std::cout << "Current player: " << pGameState.players->GetCurrentPlayer() << std::endl;
 				continue;
 			}

@@ -5,11 +5,11 @@ Sample TestSample {
 
 	//std::vector<Building> buildings;
 	{ {
-		{ 19, 0, settelment },
-		{ 28, 0, settelment },
-		{ 44, 0, city },
-		{ 8, 1, settelment },
-		{ 31, 1, settelment }
+		{ 19, 0, building_types::settelment },
+		{ 28, 0, building_types::settelment },
+		{ 44, 0, building_types::city },
+		{ 8, 1, building_types::settelment },
+		{ 31, 1, building_types::settelment }
 	} },
 	
 	//std::vector<Road> roads;

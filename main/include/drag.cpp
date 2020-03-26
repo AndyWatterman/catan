@@ -1,21 +1,10 @@
 #include "stdafx.h"
 #include "CatanGUI.h"
 
-Drag::Drag(CatanGUI & _catan) : catan(_catan) {};
-
-void Drag::SetObject(Object * obj)
-{
-	source_object = obj;
-	back_position = source_object->getPosition();	
-
-	//old_scale = source_object->getScale();
-	//source_object->setScale(1.0f, 1.0f);
-}
-
 void Drag::ReturnBack(bool accepted)
 {
 	if (accepted) {
-		source_object->setPosition(back_position.x, back_position.y);
+		transformable->setPosition(back_position);
 		source_object = nullptr;
 	}
 	else {
@@ -23,51 +12,54 @@ void Drag::ReturnBack(bool accepted)
 	}	
 }
 
-void Drag::Start()
-{
-	dragging = true;
+void Drag::Start(Object* obj)
+{	
+	source_object = obj;	
+	
+	transformable = dynamic_cast<sf::Transformable*>(obj);
+	if (transformable != nullptr) {
+		back_position = transformable->getPosition();
+		dragging = true;
+		source_object->OnStartDrag();
+	};
 }
 
 void Drag::Stop(bool accepted)
 {	
-	dragging = false;	
-	source_object->OnEndDrag(accepted);	
+	dragging = false;
+	ReturnBack(source_object->OnEndDrag(accepted));
 }
 
 void Drag::Update()
 {
 	if (dragging) {
-		sf::Vector2f pos;		
-		source_object->setPosition(catan.mouse_x, catan.mouse_y);
+		transformable->setPosition(catan->mouse);
 	}
 
 	if (going_back) {
 
-		float current_X = source_object->getPosition().x;
-		float current_Y = source_object->getPosition().y;
+		sf::Vector2f pos = transformable->getPosition();
 
-		if (abs(current_X - back_position.x) <= speed) {		
-			source_object->setPosition(back_position.x, back_position.y);
+		if (abs(pos.x - back_position.x) <= speed) {		
+			transformable->setPosition(back_position);
 			going_back = false;
 			source_object = nullptr;
 		}
-		else {
+		else {			
+			sf::Vector2f newPos;
+			float k = abs(speed / (pos.x - back_position.x));
 
-			float dX{}, dY;
-			float k = abs(speed / (current_X - back_position.x));
-
-			if (current_X > back_position.x) {
-				dX = current_X - speed;
+			if (pos.x > back_position.x) {
+				newPos.x = pos.x - speed;
 			}
 			else {
-				if (current_X < back_position.x) {
-					dX = current_X + speed;
+				if (pos.x < back_position.x) {
+					newPos.x = pos.x + speed;
 				}
 			}
-			dY = current_Y - k * (current_Y - back_position.y);
+			newPos.y = pos.y - k * (pos.y - back_position.y);
 
-			source_object->setPosition(dX, dY);
+			transformable->setPosition(newPos.x, newPos.y);
 		}
 	}
 }
-

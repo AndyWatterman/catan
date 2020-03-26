@@ -7,8 +7,11 @@
 
 #define _USE_MATH_DEFINES
 
-const int kHexBoardY = 100;		//position of drawable hex board
-const int kHexBoardX = 300;
+static std::random_device rd;
+static std::mt19937 rng(rd());
+
+const int kHexBoardY = 100+200/2;		//position of drawable hex board
+const int kHexBoardX = 300+174/2;
 const int kHexBoardYStep = 150;
 
 const int kCityHeight = 56;
@@ -41,10 +44,11 @@ const int kCityScore = 2;
 const int kPlayerContainerWidth = 500;
 const int kPlayerContainerHeight = 644;
 
-const std::string kFont = "C:/Windows/Fonts/RobotoSlab-Regular.ttf";
+//const std::string kFont = "C:/Windows/Fonts/RobotoSlab-Regular.ttf";
+const std::string kFont = "Font\\RobotoSlab-Regular.ttf";
 
 //поселение/город
-enum building_types { settelment, city, none };
+enum class building_types { settelment, city, none };
 
 //карты развития
 enum devCard {
@@ -64,12 +68,9 @@ const std::array<sf::Color, kMaxPlayerCount> kPlayerColors = {
 	sf::Color(0, 0, 0, 255)
 };
 
-static std::random_device rd;
-static std::mt19937 rng(rd());
-
 namespace Resources
 {
-	enum ID : int
+	enum class ID : unsigned int
 	{
 		all = 1000,
 		background
@@ -77,7 +78,7 @@ namespace Resources
 }
 
 namespace Sprites {
-	enum ID : int {
+	enum class ID : unsigned int {
 		stone = 0,
 		brick,
 		sheep,
@@ -148,7 +149,7 @@ namespace Sprites {
 		none
 	};
 
-	const int count = Sprites::none;
+	const unsigned int count = static_cast<unsigned int>(Sprites::ID::none);
 
 	struct SpriteTable {
 		int left, top, height, width;
@@ -159,107 +160,110 @@ namespace Sprites {
 	//SpriteTable sprite_table
 	const std::array<SpriteTable, count> sprite_table {
 		{
-			{0, 0, 200, 174, Resources::ID::all, stone},
-			{174, 0, 200, 174, Resources::ID::all, brick},
-			{348, 0, 200, 174, Resources::ID::all, sheep},
-			{522, 0, 200, 174, Resources::ID::all, wheat},
-			{696, 0, 200, 174, Resources::ID::all, wood},
-			{870, 0, 200, 174, Resources::ID::all, desert},
-			{1044, 0, 200, 174, Resources::ID::all, hex_free},
-			{1218, 0, 200, 174, Resources::ID::all, hex_hover},
+			{0, 0, 200, 174, Resources::ID::all, Sprites::ID::stone},
+			{174, 0, 200, 174, Resources::ID::all, Sprites::ID::brick},
+			{348, 0, 200, 174, Resources::ID::all, Sprites::ID::sheep},
+			{522, 0, 200, 174, Resources::ID::all, Sprites::ID::wheat},
+			{696, 0, 200, 174, Resources::ID::all, Sprites::ID::wood},
+			{870, 0, 200, 174, Resources::ID::all, Sprites::ID::desert},
+			{1044, 0, 200, 174, Resources::ID::all, Sprites::ID::hex_free},
+			{1218, 0, 200, 174, Resources::ID::all, Sprites::ID::hex_hover},
 
-			{0, 200, 56, 56, Resources::ID::all, redSet},
-			{112, 200, 56, 56, Resources::ID::all, blueSet},
-			{56, 200, 56, 56, Resources::ID::all, greenSet},			
-			{280, 200, 56, 56, Resources::ID::all, orangeSet},
-			{168, 200, 56, 56, Resources::ID::all, whiteSet},
-			{224, 200, 56, 56, Resources::ID::all, brownSet},
+			{0, 200, 56, 56, Resources::ID::all, Sprites::ID::redSet},
+			{112, 200, 56, 56, Resources::ID::all, Sprites::ID::blueSet},
+			{56, 200, 56, 56, Resources::ID::all, Sprites::ID::greenSet},
+			{280, 200, 56, 56, Resources::ID::all, Sprites::ID::orangeSet},
+			{168, 200, 56, 56, Resources::ID::all, Sprites::ID::whiteSet},
+			{224, 200, 56, 56, Resources::ID::all, Sprites::ID::brownSet},
 
-			{336, 200, 56, 56, Resources::ID::all, redCity},
-			{448, 200, 56, 56, Resources::ID::all, blueCity},
-			{392, 200, 56, 56, Resources::ID::all, greenCity},			
-			{616, 200, 56, 56, Resources::ID::all, orangeCity},
-			{504, 200, 56, 56, Resources::ID::all, whiteCity},
-			{560, 200, 56, 56, Resources::ID::all, brownCity},		
+			{336, 200, 56, 56, Resources::ID::all, Sprites::ID::redCity},
+			{448, 200, 56, 56, Resources::ID::all, Sprites::ID::blueCity},
+			{392, 200, 56, 56, Resources::ID::all, Sprites::ID::greenCity},
+			{616, 200, 56, 56, Resources::ID::all, Sprites::ID::orangeCity},
+			{504, 200, 56, 56, Resources::ID::all, Sprites::ID::whiteCity},
+			{560, 200, 56, 56, Resources::ID::all, Sprites::ID::brownCity},
 
-			{672, 200, 56, 56, Resources::ID::all, selectedCity},
-			{728, 200, 56, 56, Resources::ID::all, hookCity},
+			{672, 200, 56, 56, Resources::ID::all, Sprites::ID::selectedCity},
+			{728, 200, 56, 56, Resources::ID::all, Sprites::ID::hookCity},
 
-			{ 784, 200, 56, 56, Resources::ID::all, selRedSet},
-			{ 896, 200, 56, 56, Resources::ID::all, selBlueSet},
-			{ 840, 200, 56, 56, Resources::ID::all, selGreenSet},			
-			{ 1064, 200, 56, 56, Resources::ID::all, selOrangeSet},
-			{ 952, 200, 56, 56, Resources::ID::all, selWhiteSet},
-			{ 1008, 200, 56, 56, Resources::ID::all, selBrownSet},	
+			{ 784, 200, 56, 56, Resources::ID::all, Sprites::ID::selRedSet},
+			{ 896, 200, 56, 56, Resources::ID::all, Sprites::ID::selBlueSet},
+			{ 840, 200, 56, 56, Resources::ID::all, Sprites::ID::selGreenSet},
+			{ 1064, 200, 56, 56, Resources::ID::all, Sprites::ID::selOrangeSet},
+			{ 952, 200, 56, 56, Resources::ID::all, Sprites::ID::selWhiteSet},
+			{ 1008, 200, 56, 56, Resources::ID::all, Sprites::ID::selBrownSet},
 
-			{ 1120, 200, 56, 56, Resources::ID::all, selRedCity},
-			{ 1232, 200, 56, 56, Resources::ID::all, selBlueCity},
-			{ 1176, 200, 56, 56, Resources::ID::all, selGreenCity},			
-			{ 1400, 200, 56, 56, Resources::ID::all, selOrangeCity},
-			{ 1288, 200, 56, 56, Resources::ID::all, selWhiteCity},
-			{ 1344, 200, 56, 56, Resources::ID::all, selBrownCity},		
+			{ 1120, 200, 56, 56, Resources::ID::all, Sprites::ID::selRedCity},
+			{ 1232, 200, 56, 56, Resources::ID::all, Sprites::ID::selBlueCity},
+			{ 1176, 200, 56, 56, Resources::ID::all, Sprites::ID::selGreenCity},
+			{ 1400, 200, 56, 56, Resources::ID::all, Sprites::ID::selOrangeCity},
+			{ 1288, 200, 56, 56, Resources::ID::all, Sprites::ID::selWhiteCity},
+			{ 1344, 200, 56, 56, Resources::ID::all, Sprites::ID::selBrownCity},
 
-			{ 1456, 200, 56, 56, Resources::ID::all, n2 },
-			{ 1512, 200, 56, 56, Resources::ID::all, n3 },
-			{ 1568, 200, 56, 56, Resources::ID::all, n4 },
-			{ 1624, 200, 56, 56, Resources::ID::all, n5 },
-			{ 1680, 200, 56, 56, Resources::ID::all, n6 },
-			{ 1736, 200, 56, 56, Resources::ID::all, n8 },
-			{ 1792, 200, 56, 56, Resources::ID::all, n9 },
-			{ 1848, 200, 56, 56, Resources::ID::all, n10 },
-			{ 1904, 200, 56, 56, Resources::ID::all, n11 },
-			{ 1960, 200, 56, 56, Resources::ID::all, n12 },
+			{ 1456, 200, 56, 56, Resources::ID::all, Sprites::ID::n2 },
+			{ 1512, 200, 56, 56, Resources::ID::all, Sprites::ID::n3 },
+			{ 1568, 200, 56, 56, Resources::ID::all, Sprites::ID::n4 },
+			{ 1624, 200, 56, 56, Resources::ID::all, Sprites::ID::n5 },
+			{ 1680, 200, 56, 56, Resources::ID::all, Sprites::ID::n6 },
+			{ 1736, 200, 56, 56, Resources::ID::all, Sprites::ID::n8 },
+			{ 1792, 200, 56, 56, Resources::ID::all, Sprites::ID::n9 },
+			{ 1848, 200, 56, 56, Resources::ID::all, Sprites::ID::n10 },
+			{ 1904, 200, 56, 56, Resources::ID::all, Sprites::ID::n11 },
+			{ 1960, 200, 56, 56, Resources::ID::all, Sprites::ID::n12 },
 
-			{0, 256, 102, 16, Resources::ID::all, redRoad},
-			{32, 256, 102, 16, Resources::ID::all, blueRoad},
-			{16, 256, 102, 16, Resources::ID::all, greenRoad},			
-			{80, 256, 102, 16, Resources::ID::all, orangeRoad },
-			{48, 256, 102, 16, Resources::ID::all, whiteRoad },
-			{64, 256, 102, 16, Resources::ID::all, brownRoad },
+			{0, 256, 102, 16, Resources::ID::all, Sprites::ID::redRoad},
+			{32, 256, 102, 16, Resources::ID::all, Sprites::ID::blueRoad},
+			{16, 256, 102, 16, Resources::ID::all, Sprites::ID::greenRoad},
+			{80, 256, 102, 16, Resources::ID::all, Sprites::ID::orangeRoad },
+			{48, 256, 102, 16, Resources::ID::all, Sprites::ID::whiteRoad },
+			{64, 256, 102, 16, Resources::ID::all, Sprites::ID::brownRoad },
 
-			{96, 256, 102, 16, Resources::ID::all, selectedRoad },
-			{112, 256, 102, 16, Resources::ID::all, hookRoad },
+			{96, 256, 102, 16, Resources::ID::all, Sprites::ID::selectedRoad },
+			{112, 256, 102, 16, Resources::ID::all, Sprites::ID::hookRoad },
 
-			{128, 256, 102, 16, Resources::ID::all, selRedRoad },
-			{160, 256, 102, 16, Resources::ID::all, selBlueRoad },
-			{144, 256, 102, 16, Resources::ID::all, selGreenRoad },			
-			{208, 256, 102, 16, Resources::ID::all, selOrangeRoad },
-			{176, 256, 102, 16, Resources::ID::all, selWhiteRoad },
-			{192, 256, 102, 16, Resources::ID::all, selBrownRoad },
+			{128, 256, 102, 16, Resources::ID::all, Sprites::ID::selRedRoad },
+			{160, 256, 102, 16, Resources::ID::all, Sprites::ID::selBlueRoad },
+			{144, 256, 102, 16, Resources::ID::all, Sprites::ID::selGreenRoad },
+			{208, 256, 102, 16, Resources::ID::all, Sprites::ID::selOrangeRoad },
+			{176, 256, 102, 16, Resources::ID::all, Sprites::ID::selWhiteRoad },
+			{192, 256, 102, 16, Resources::ID::all, Sprites::ID::selBrownRoad },
 
-			{0, 359, 547, 153, Resources::ID::all, harbor_stone },
-			{154, 359, 547, 153, Resources::ID::all, harbor_3_brick },
-			{308, 359, 547, 153, Resources::ID::all, harbor_3_sheep },
-			{462, 359, 547, 153, Resources::ID::all, harbor_3 },
-			{616, 359, 547, 153, Resources::ID::all, harbor_3_weat },
-			{770, 359, 547, 153, Resources::ID::all, harbor_wood },
-			{1392, 0, 27, 96, Resources::ID::all, btnGenHexesUp},
-			{1392, 27, 27, 96, Resources::ID::all, btnGenHexesDown},
-			{0, 0, 1080, 1920, Resources::ID::background, background }
+			{0, 359, 547, 153, Resources::ID::all, Sprites::ID::harbor_stone },
+			{154, 359, 547, 153, Resources::ID::all, Sprites::ID::harbor_3_brick },
+			{308, 359, 547, 153, Resources::ID::all, Sprites::ID::harbor_3_sheep },
+			{462, 359, 547, 153, Resources::ID::all, Sprites::ID::harbor_3 },
+			{616, 359, 547, 153, Resources::ID::all, Sprites::ID::harbor_3_weat },
+			{770, 359, 547, 153, Resources::ID::all, Sprites::ID::harbor_wood },
+			{1392, 0, 27, 96, Resources::ID::all, Sprites::ID::btnGenHexesUp},
+			{1392, 27, 27, 96, Resources::ID::all, Sprites::ID::btnGenHexesDown},
+			{0, 0, 1080, 1920, Resources::ID::background, Sprites::ID::background }
 		} 
 	};
 }
 
-//this is for behavior of objects
-namespace BoardObjects {
-	enum ID: int
-	{
-		deck = 10000,
-		hex,
-		city,
-		road,
-		settelment,
-		cityHooks,
-		roadHooks,
-		borders,
-		button,
-		label,
-		rectangle
-	};	
-}
 
-enum btnStates: int {normal = 0, hover, pressed};
-enum objButtonEvents: int {genHexes = 0, nextTurn, nothing};
+enum class BoardObjects : unsigned int {
+	deck = 10000,
+	hex,
+	city,
+	road,
+	roadHooks,
+	settelment,	
+	building,
+	buildingHooks,
+	borders,
+	button,
+	label,
+	rectangle,
+	none
+};
+
+
+enum class btnStates: unsigned int {normal = 0, hover, pressed};
+enum class objButtonEvents: unsigned int {genHexes = 0, nextTurn, nothing};
+
+//typedef void(*pSetPosition)(const sf::Vector2f& position);
+//typedef const sf::Vector2f& (*pGetPosition)();
 
 //typedef int node[kMaxConnections];
 typedef std::array<int, kMaxConnections> node;
@@ -281,17 +285,6 @@ const std::array<std::array<int, kHexCount>, 6> hexSequence = { {
 	{11, 6, 2, 1, 0, 3, 7, 12, 16, 17, 18, 15, 10, 5, 4, 8, 13, 14, 9 },
 	{2, 1, 0, 3, 7, 12, 16, 17, 18, 15, 11, 6, 5, 4, 8, 13, 14, 10, 9 }
 }};
-
-/*const std::array<std::array<int, 3>, 72> road_id_to_from_to = { {
-	{0, 0, 4},	{1, 0, 3},	{2, 1, 5},	{3, 1, 4},	{4, 2, 6},	{5, 2, 5},	{6, 3, 7},	{7, 4, 8},	{8, 5, 9},	{9, 6, 10},
-	{10, 7, 12}, {11, 7, 11}, {12, 8, 13}, {13, 8, 12},	{14, 9, 14}, {15, 9, 13}, {16, 10, 15},	{17, 10, 14}, {18, 11, 16},	{19, 12, 17},
-	{20, 13, 18}, {21, 14, 19},	{22, 15, 20}, {23, 16, 22},	{24, 16, 21}, {25, 17, 23}, {26, 17, 22}, {27, 18, 24},	{28, 18, 23}, {29, 19, 25},
-	{30, 19, 24}, {31, 20, 26},	{32, 20, 25}, {33, 21, 27}, {34, 22, 28}, {35, 23, 29},	{36, 24, 30}, {37, 25, 31},	{38, 26, 32}, {39, 27, 33},
-	{40, 28, 34},	{41, 28, 33},	{42, 29, 35},	{43, 29, 34},	{44, 30, 36}, {45, 30, 35}, {46, 31, 37}, {47, 31, 36},	{48, 32, 37},	{49, 33, 38},
-	{50, 34, 39},	{51, 35, 40},	{52, 36, 41},	{53, 37, 42},	{54, 38, 43},	{55, 39, 44},	{56, 39, 43},	{57, 40, 45},	{58, 40, 44},	{59, 41, 46},
-	{60, 41, 45},	{61, 42, 46},	{62, 43, 47},	{63, 44, 48},	{64, 45, 49},	{65, 46, 50},	{66, 47, 51},	{67, 48, 52},	{68, 48, 51},	{69, 49, 53},
-	{70, 48, 52},	{71, 50, 53}	
-} }*/;
 
 const std::array<std::array<int, 2>, 72> road_id_to_from_to = { {
 	{0, 4},	{0, 3},	{1, 5},	{1, 4},	{2, 6},	{2, 5},	{3, 7},	{4, 8},	{5, 9},	{6, 10},
@@ -340,3 +333,5 @@ class Players;
 class Buildings;
 struct _Board;
 struct Sample;
+
+extern const std::unique_ptr<CatanGUI> catan;

@@ -4,29 +4,140 @@
 unsigned int Object::ObjectIDs = 0;
 unsigned int BoardHex::hex_id = 0;
 unsigned int BoardBorder::border_id = 0;
+unsigned int roadHooks::road_hook_id = 0;
 
-Object::Object(CatanGUI & _catan, BoardObjects::ID _type) :
-	catan(_catan), objectType(_type), objectId(ObjectIDs)
+Object::Object(BoardObjects _type) :
+	objectType(_type), objectId(ObjectIDs)
 {
 	ObjectIDs++;
 }
 
-BoardHex::BoardHex(CatanGUI & _catan, float x, float y, float angle):	
-	RectangleObject(_catan, BoardObjects::hex, Sprites::hex_free, 176, 200, x, y, angle)
+bool Object::IsHidden() const
+{
+	return hidden;
+}
+
+bool Object::IsActive() const
+{
+	return active;
+}
+
+bool Object::IsDraggable() const
+{
+	return draggable;
+}
+
+void Object::Disable()
+{
+	active = false;
+}
+
+void Object::Enable()
+{
+	active = true;
+}
+
+void Object::Hide()
+{
+	hidden = true;
+}
+
+void Object::Show()
+{
+	hidden = false;
+}
+
+void Object::TurnDragOn()
+{
+	draggable = true;
+}
+
+void Object::TurnDragOff()
+{
+	draggable = false;
+}
+
+unsigned int Object::getObjectId() const
+{
+	return objectId;
+}
+
+BoardObjects Object::getObjectType() const
+{
+	 return (objectType);
+}
+
+void Object::OnMouseDown(int x, int y, sf::Mouse::Button button)
+{
+}
+
+void Object::OnMouseMove()
+{
+}
+
+bool Object::OnMouseOver(float x, float y)
+{
+	return false;
+}
+
+void Object::OnMouseUp(sf::Mouse::Button button)
+{
+}
+
+void Object::OnMouseLeave()
+{
+}
+
+bool Object::OnDragDrop(Object* obj)
+{
+	return false;
+}
+
+void Object::OnDrag()
+{
+}
+
+void Object::OnDragOver(Object* obj)
+{
+}
+
+void Object::OnStartDrag()
+{
+}
+
+bool Object::OnEndDrag(bool accepted)
+{
+	return false;
+}
+
+bool Object::IsDragObjectAcceptable(Object* obj)
+{
+	return false;
+}
+
+void Object::Update()
+{
+}
+
+BoardHex::BoardHex(float x, float y):
+	Rectangle(BoardObjects::hex, Sprites::ID::hex_free, x, y, 176, 200, 0)
 {
 	current_hex_id = hex_id++;
 		
-	diceSprite = catan.GetSprite(Sprites::n10);
+	diceSprite = catan->GetSprite(Sprites::ID::n10);	//only to calculate position
 	sf::FloatRect fr = getGlobalBounds();
 	diceSprite.setPosition(fr.left + fr.width / 2 - 56 / 2, fr.top + fr.height / 2 - 56 / 2);
+
+	UseTextureForDrop(true);
 }
 
-const unsigned int BoardHex::getCurrentHexId()
+
+unsigned int BoardHex::getCurrentHexId() const
 {
 	return (current_hex_id);
 }
 
-const int BoardHex::getDice()
+int BoardHex::getDice() const
 {
 	return (dice);
 }
@@ -36,102 +147,114 @@ void BoardHex::OnMouseDown(int x, int y, sf::Mouse::Button button)
 	isPressed = true;
 }
 
-void BoardHex::OnMouseMove(float x, float y)
+void BoardHex::OnMouseMove()
 {
-	if (getSpriteID() == Sprites::hex_free) {
-		setTextureRect(catan.GetSprite(Sprites::hex_hover).getTextureRect());
+	if (getSpriteId() == Sprites::ID::hex_free) {
+		setTextureRect(catan->GetSprite(Sprites::ID::hex_hover).getTextureRect());
 	}
 }
 
 void BoardHex::OnMouseLeave()
 {	
-	setTextureRect(catan.GetSprite(getSpriteID()).getTextureRect());
+	setTextureRect(catan->GetSprite(getSpriteId()).getTextureRect());
 	isPressed = false;
 }
+
 
 void BoardHex::OnMouseUp(sf::Mouse::Button button)
 {
 	if (isPressed) {
 		isPressed = false;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) {
-			if (getSpriteID() >= Sprites::desert) {
-				setSpriteID(Sprites::stone);
+			if (getSpriteId() >= Sprites::ID::desert) {
+				setSpriteID(Sprites::ID::stone);
 			}
 			else {
-				setSpriteID(static_cast<Sprites::ID>(getSpriteID() + 1));
+				setSpriteID(static_cast<Sprites::ID>(static_cast<int>(getSpriteId()) + 1));
 			}
 
-			catan.catan_ai->setHexResource(getCurrentHexId(), static_cast<resource>(getSpriteID()));
+			catan->catan_ai->setHexResource(getCurrentHexId(), static_cast<resource>(getSpriteId()));
 		}
 	}
 }
 
 void BoardHex::OnDraw()
 {
-	catan.GetWindow().draw(*this);
+	catan->GetWindow().draw(*this);
 	if (getDice() > 0) {
-		catan.GetWindow().draw(diceSprite);
+		catan->GetWindow().draw(diceSprite);
 	}
 }
 
+void BoardHex::Update()
+{
+	setSpriteID(static_cast<Sprites::ID>(catan->catan_ai->getResourcesRef()[current_hex_id]));
+
+	auto _dice = catan->catan_ai->getDicesRef()[current_hex_id];
+	if (_dice > 0) {
+		(_dice < 7) ? (_dice += 32) : (_dice += 31);
+		setDice(_dice);
+	}
+	else {
+		setDice(0);
+	}
+}
+
+
 void BoardHex::setDice(int _dice)
 {
-	if (_dice > 0) {		
-		diceSprite.setTextureRect(catan.GetSprite(static_cast<Sprites::ID>(_dice)).getTextureRect());		
-	}	
-	dice = _dice;
+	if ((dice = _dice) > 0) {
+		diceSprite.setTextureRect(catan->GetSprite(static_cast<Sprites::ID>(dice)).getTextureRect());
+	}
 }
 
-Btn::Btn(CatanGUI & _catan, float x, float y, Sprites::ID normal, Sprites::ID pressed, objButtonEvents event) :	
-	RectangleObject(_catan, BoardObjects::button, normal, 96, 27, x, y, 0)
-{
-	Btn::pressed = catan.GetSprite(pressed);	
-	Btn::pressed.setPosition(x, y);
-	Btn::event = event;	
-}
+Btn::Btn(float x, float y, int width, int height, float angle,
+	const sf::Color& OutlineColor, float OutlineThickness, const sf::Color& FillColor,
+	const sf::Color& HoverFillColor, const sf::Color& HoverOutlineColor, const sf::Color& HoverTextColor,
+	const sf::Color& PressedFillColor, const sf::Color& PressedOutlineColor, const sf::Color& PressedTextColor,
+	const sf::Color& textColor, const std::string& text, int textSize, objButtonEvents event) :
+	Rectangle(BoardObjects::button, OutlineColor, OutlineThickness, FillColor,x, y, width, height, angle),
 
-Btn::Btn(CatanGUI & _catan, float x, float y, int width, int height, float angle,
-	const sf::Color & OutlineColor, float OutlineThickness, const sf::Color & FillColor,
-	const sf::Color & HoverFillColor, const sf::Color & HoverOutlineColor,
-	const sf::Color & PressedFillColor, const sf::Color & PressedOutlineColor,
-	const sf::Color &textColor, const std::string & text, int textSize,
-	objButtonEvents event) :
-	RectangleObject(_catan, BoardObjects::button, OutlineColor, OutlineThickness, FillColor,
-		x, y, width, height, angle),
-	OutlineColor(OutlineColor), FillColor(FillColor), HoverFillColor(HoverFillColor), HoverOutlineColor(HoverOutlineColor),
-	PressedFillColor(PressedFillColor), PressedOutlineColor(PressedOutlineColor), text(text),
-	event(event)
-{
-	font.loadFromFile(kFont);
-	caption.setFont(font);
+	OutlineColor(OutlineColor), FillColor(FillColor), textColor(textColor), 
+	HoverFillColor(HoverFillColor), HoverOutlineColor(HoverOutlineColor), HoverTextColor(HoverTextColor),
+	PressedFillColor(PressedFillColor), PressedOutlineColor(PressedOutlineColor), PressedTextColor(PressedTextColor),
+	text(text),	event(event)
+{	
+	caption.setFont(catan->getFont());
 	caption.setString(text);
 	caption.setCharacterSize(textSize);
 	caption.setFillColor(textColor);
 
-	const sf::FloatRect bounds(caption.getLocalBounds());
-	const sf::Vector2f box(RectangleObject::getSize());
-	caption.setPosition(x, y);
-	caption.setRotation(angle);
-	//caption.setStyle(sf::Text::Bold);
+	/*const sf::FloatRect bounds(caption.getLocalBounds());
+	const sf::Vector2f box(Rectangle::getSize());	
+	caption.setRotation(angle);	
 	caption.setOrigin((bounds.width - box.x) / 2 + bounds.left, (bounds.height - box.y) / 2 + bounds.top);
+	caption.setPosition(x, y);*/
+
+	const sf::FloatRect bounds(caption.getLocalBounds());
+	caption.setOrigin(bounds.width / 2, bounds.height / 2 + bounds.top);
+	caption.setPosition(x, y);
 }
 
 void Btn::setBtnState(btnStates state)
 {
 	switch (state) {
-		case normal:
+		case btnStates::normal:
 			setOutlineColor(OutlineColor);
 			setFillColor(FillColor);
+			caption.setFillColor(textColor);
 			break;
 
-		case hover:
+		case btnStates::hover:
 			setOutlineColor(HoverOutlineColor);
 			setFillColor(HoverFillColor);
+			caption.setFillColor(HoverTextColor);
 			break;
 
 		case btnStates::pressed:
 			setOutlineColor(PressedOutlineColor);
 			setFillColor(PressedFillColor);
+			caption.setFillColor(PressedTextColor);
 	}
 }
 
@@ -139,95 +262,79 @@ void Btn::setBtnState(btnStates state)
 void Btn::OnMouseDown(int x, int y, sf::Mouse::Button button)
 {
 	isPressed = true;
-	if (!getTexture()) {
-		setBtnState(btnStates::pressed);
-	}
+	setBtnState(btnStates::pressed);	
 }
 
 void Btn::OnMouseLeave()
 {
 	isPressed = false;
-	if (!getTexture()) {
-		setBtnState(btnStates::normal);
-	}
+	setBtnState(btnStates::normal);
 }
 
-void Btn::OnMouseMove(float x, float y)
+void Btn::OnMouseMove()
 {
-	if (!getTexture()) {
-		setBtnState(btnStates::hover);
-	}
+	setBtnState(btnStates::hover);
 }
 
 void Btn::OnMouseUp(sf::Mouse::Button button)
 {
 	if (isPressed) {
-		isPressed = false;
-
-		if (!getTexture()) {
-			setBtnState(btnStates::hover);
-		}
-
-		processBtnEvent(catan, event);
+		isPressed = false;		
+		setBtnState(btnStates::hover);
+		processBtnEvent(event);
 	}
 }
 
 void Btn::OnDraw()
 {
-	if (getTexture()) {
-		if (!isPressed) {
-			catan.GetWindow().draw(*this);
-		}
-		else {
-			catan.GetWindow().draw(pressed);
-		}
-	}
-	else {
-		catan.GetWindow().draw(*this);
-		catan.GetWindow().draw(caption);
-	}
+	catan->GetWindow().draw(*this);
+	catan->GetWindow().draw(caption);
 }
 
-void Btn::processBtnEvent(CatanGUI & catan, objButtonEvents event)
+void Btn::processBtnEvent(objButtonEvents event)
 {
 	switch (event) {
-        case genHexes:
+		case objButtonEvents::genHexes:
 			std::cout << "genHexesPressed" << std::endl;
-			catan.catan_ai->genNewHexes();
-			catan.board->UpdateHexesAndDices();
+			catan->catan_ai->genNewHexes();			
 			break;
 
-        case nextTurn:
+        case objButtonEvents::nextTurn:
 			std::cout << "nextTurnPressed" << std::endl;
-			catan.catan_ai->nextTurn();
+			catan->catan_ai->nextTurn();
 			break;
     }
 }
 
-BoardBorder::BoardBorder(CatanGUI & _catan, Sprites::ID spriteId, float x, float y, double angle):	
-	RectangleObject(_catan, BoardObjects::borders, spriteId, 153, 547, x, y, angle)
+BoardBorder::BoardBorder(float x, float y, double angle):
+	Rectangle(BoardObjects::borders, Sprites::ID::none, x, y, 153, 547, angle)
 {	
 	current_border_id = border_id++;
+	setOrigin(0, 0);
+	UseTextureForDrop(true);
 }
 
-const unsigned int BoardBorder::getCurrentBorderId()
+
+unsigned int BoardBorder::getCurrentBorderId() const
 {
 	return (current_border_id);
 }
+
 
 void BoardBorder::OnMouseUp(sf::Mouse::Button button)
 {
 	if (isPressed) {
 		isPressed = false;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) {
-			if (getSpriteID() >= Sprites::harbor_wood) {
-				setSpriteID(Sprites::harbor_stone);
+			if (getSpriteId() >= Sprites::ID::harbor_wood) {
+				setSpriteID(Sprites::ID::harbor_stone);
 			}
 			else {
-				setSpriteID(static_cast<Sprites::ID>(getSpriteID() + 1));
+				setSpriteID(static_cast<Sprites::ID>(static_cast<int>(getSpriteId()) + 1));
 			}
 
-			catan.catan_ai->setBorderType(getCurrentBorderId(), static_cast<resource>(getSpriteID() - Sprites::harbor_stone));
+			catan->catan_ai->setBorderType(getCurrentBorderId(), 
+				static_cast<resource>(static_cast<int>(getSpriteId()) - static_cast<int>(Sprites::ID::harbor_stone)));
 		}
 	}
 }
@@ -244,20 +351,20 @@ void BoardBorder::OnMouseLeave()
 
 void BoardBorder::setHarbor(int h)
 {
-	Sprites::ID sId;
+	Sprites::ID sId = Sprites::ID::none;
 
 	switch (h) {
-		case 0: sId = Sprites::harbor_stone;
+		case 0: sId = Sprites::ID::harbor_stone;
 			break;
-		case 1: sId = Sprites::harbor_3_brick;
+		case 1: sId = Sprites::ID::harbor_3_brick;
 			break;
-		case 2: sId = Sprites::harbor_3_sheep;
+		case 2: sId = Sprites::ID::harbor_3_sheep;
 			break;
-		case 3: sId = Sprites::harbor_3;
+		case 3: sId = Sprites::ID::harbor_3;
 			break;
-		case 4: sId = Sprites::harbor_3_weat;
+		case 4: sId = Sprites::ID::harbor_3_weat;
 			break;
-		case 5: sId = Sprites::harbor_wood;
+		case 5: sId = Sprites::ID::harbor_wood;
 			break;
 
 	default:
@@ -267,10 +374,32 @@ void BoardBorder::setHarbor(int h)
 	setSpriteID(sId);
 }
 
-RectangleObject::RectangleObject(CatanGUI & _catan, BoardObjects::ID _type, 
+void BoardBorder::Update()
+{
+	std::vector<resource>& harbors = catan->catan_ai->getHarborsRef();
+	for (size_t i = 0; i < 6; i++)
+	{
+		bool found = true;
+		int rowHPoints = current_border_id * 5;
+		int rowHRes = static_cast<int>(i * 5);
+		for (size_t j = 0; j < 5; j++)
+		{
+			if (harbors[harborPoints[rowHPoints + j]] != harborResources[rowHRes + j]) {
+				found = false;
+				break;
+			}
+		}
+		if (found) {
+			setHarbor(rowHRes / 5);
+			break;
+		}
+	}
+}
+
+Rectangle::Rectangle(BoardObjects _type,
 	sf::Color OutlineColor, float OutlineThickness, sf::Color FillColor,
 	float x, float y, int width, int height, float angle)
-	:Object(_catan, _type)
+	:Object(_type)
 {
 	setSize(sf::Vector2f(width, height));
 	setRotation(angle);
@@ -278,383 +407,470 @@ RectangleObject::RectangleObject(CatanGUI & _catan, BoardObjects::ID _type,
 	setOutlineThickness(OutlineThickness);
 	RectangleShape::setPosition(x, y);
 	setFillColor(FillColor);	
+
+	sf::Vector2f orig = getSize();
+	setOrigin(orig.x / 2, orig.y / 2);
 }
 
-//Load only sprite
-RectangleObject::RectangleObject(CatanGUI & _catan, BoardObjects::ID _type, 
-	Sprites::ID spriteId, int width, int height, float x, float y, float angle)
-	:Object(_catan, _type)
+Rectangle::Rectangle(BoardObjects _type, Sprites::ID sprite, float x, float y, int width, int height, float angle)
+	:Object(_type)
 {
 	setSize(sf::Vector2f(width, height));
 	setRotation(angle);
-	RectangleShape::setPosition(x, y);
-	
-	RectangleObject::sprite_id = spriteId;
+	setPosition(x, y);	
+	setSpriteID(sprite);
 
-	if (RectangleObject::sprite_id != Sprites::ID::none) {
-		setTexture(&catan.GetTexture(Resources::all));
-		setTextureRect(catan.GetSprite(spriteId).getTextureRect());
-	};
+	sf::Vector2f orig = getSize();
+	setOrigin(orig.x / 2, orig.y / 2);
 }
 
-void RectangleObject::setSpriteID(Sprites::ID sp)
+Sprites::ID Rectangle::getSpriteId() const
 {
-	sprite_id = sp;
-
-	if (sprite_id != Sprites::ID::none) {
-		setTexture(&catan.GetTexture(Resources::all), true);
-		setTextureRect(catan.GetSprite(sp).getTextureRect());
-	}
-	else {
-		setTexture(nullptr, true);
-	};
+	return (sprite_id);
 }
 
-PlayerContainer::PlayerContainer(CatanGUI & _catan, BoardObjects::ID _type,
-	int player_id, float x, float y) :
-	RectangleObject(_catan, _type, sf::Color(85, 85, 85, 255), 3,
-		kPlayerColors[_catan.catan_ai->getCurrentPlayer()], x, y,
+void Rectangle::setSpriteID(Sprites::ID sprite)
+{
+	if (sprite != sprite_id) {
+		if (sprite != Sprites::ID::none) {
+			setTexture(&catan->GetTexture(Resources::ID::all), true);
+			setTextureRect(catan->GetSprite(sprite).getTextureRect());
+		}
+		else {
+			setTexture(nullptr, true);
+		};
+		sprite_id = sprite;
+	}	
+}
+
+PlayerContainer::PlayerContainer(float x, float y) :
+	Rectangle(BoardObjects::rectangle, sf::Color(85, 85, 85, 255), 3,
+		kPlayerColors[catan->catan_ai->getCurrentPlayer()], x, y,
 		kPlayerContainerWidth, kPlayerContainerHeight, 0)
 {
+	
+}
 
+bool Rectangle::IsTextureUsedForDrop() const
+{
+	return useTextureForDragNDrop;
+}
+
+void Rectangle::UseTextureForDrop(bool enable)
+{
+	useTextureForDragNDrop = enable;
+}
+
+bool Rectangle::OnMouseOver(float x, float y)
+{
+	if (!IsHidden()) {
+		if (getGlobalBounds().contains(x, y)) {
+			sf::Vector2f vec = getTransform().getInverse().transformPoint(x, y);
+			
+			bool mouseOnObject = false;
+			sf::FloatRect lBounds = getLocalBounds();
+			if ((vec.x < lBounds.width) && (vec.x >= 0)
+				&& (vec.y < lBounds.height) && (vec.y >= 0)) {		
+
+				if (!getTexture() || !IsTextureUsedForDrop()) {	//no texture, only shape					
+					return (true);					
+				}
+				else {
+					sf::IntRect rect = getTextureRect();
+					const sf::Image& image = catan->GetMainImage();
+					sf::Color pColor = image.getPixel(static_cast<unsigned int>(vec.x + rect.left),
+						static_cast<unsigned int>(vec.y + rect.top));
+					if (pColor.a) {						
+						return (true);
+					}
+				}
+			}			
+		}
+	}
+	
+	return (false);
+}
+
+void Rectangle::OnDraw()
+{
+	catan->GetWindow().draw(*this);
 }
 
 void PlayerContainer::Update()
 {
-	setFillColor(kPlayerColors[catan.catan_ai->getCurrentPlayer()]);
+	setFillColor(kPlayerColors[catan->catan_ai->getCurrentPlayer()]);
 }
 
-unsigned int cityHooks::city_hook_id = 0;
-
-cityHooks::cityHooks(CatanGUI & _catan, float x, float y):
-	RectangleObject(_catan, BoardObjects::cityHooks, sf::Color(), 0,
-		sf::Color(0,0,0,0), x, y, 56, 56, 0)
-{
-	point = city_hook_id++;
-
-	sf::Vector2f orig = getSize();
-	setOrigin(orig.x / 2, orig.y / 2);
-
-	setDragRectangle(true);
+Label::Label(float x, float y, double angle, const sf::Color& textColor, const std::string& text, unsigned int textSize)
+	: Object(BoardObjects::label)
+{	
+	setFont(catan->getFont());
+	setString(text);
+	setCharacterSize(textSize);
+	setFillColor(textColor);
+	sf::Text::setPosition(x, y);
+	setRotation(angle);	
 }
 
-bool cityHooks::IsDragObjectAcceptable(Object* obj)
+void Label::OnDraw()
 {
-	bool result = false;
+	catan->GetWindow().draw(*this);
+}
 
-	if (obj != nullptr) {
-		const Sprites::ID _id = obj->getSpriteID();
-		if ((_id >= Sprites::redSet) && (_id <= Sprites::brownCity))		
-			result = true;		
+BoardBuilding::BoardBuilding(Sprites::ID spriteId, float x, float y)
+	: Rectangle(BoardObjects::building, spriteId, x, y, 56, 56, 0)
+{
+	if ((spriteId >= Sprites::ID::redSet) && (spriteId <= Sprites::ID::brownSet)) {
+		type = building_types::settelment;
+	}
+	else {
+		type = building_types::city;
 	}
 
-	return (result);
+	TurnDragOn();
 }
 
-bool cityHooks::OnDragDrop(Object* obj)
+bool BoardBuilding::OnEndDrag(bool accepted)
 {
-	catan.drag->GetObject()->Show();
-	
-	int objType = obj->getObjectType();
-	Building* building = catan.catan_ai->game_state->buildings->getBuilding(point);
-
-	if (((objType == BoardObjects::city) && (building != nullptr) && (building->type == settelment) && (building->id == catan.catan_ai->getCurrentPlayer()))
-		|| ((objType == BoardObjects::settelment) && (building == nullptr))
-		|| ((objType == BoardObjects::cityHooks)))
-	{
-		if (((!catan.catan_ai->game_state->buildings->IsThereBuildingsAround(point))
-			&& (catan.catan_ai->game_state->roads->IsRoadPointExists(point)))
-			|| (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))) {
-
-			if (objType == BoardObjects::cityHooks) {
-
-				cityHooks* dropObjCityHook = dynamic_cast<cityHooks*>(obj);
-
-				int dropObjPoint = dropObjCityHook->point;
-				Building* building = catan.catan_ai->game_state->buildings->getBuilding(dropObjPoint);
-				int owner = building->id;
-				building_types type = building->type;
-
-				catan.catan_ai->game_state->buildings->DeleteSettelement(point);
-				catan.catan_ai->game_state->buildings->DeleteSettelement(dropObjPoint);
-				catan.catan_ai->game_state->buildings->AddSettelement(point, owner);
-
-				if (type == city)
-					catan.catan_ai->game_state->buildings->UpgradeBuilding(point);				
-			}
-			else {
-				catan.catan_ai->game_state->buildings->DeleteSettelement(point);
-				catan.catan_ai->game_state->buildings->AddSettelement(point, catan.catan_ai->getCurrentPlayer());
-				if (objType == BoardObjects::city)
-					catan.catan_ai->game_state->buildings->UpgradeBuilding(point);
-			}
-			
-			return true;
-		}
+	if (accepted) {
+		return true;	//need to return dragging object back
 	}
-	
 	return false;
 }
 
-void cityHooks::OnDragOver(Object* obj)
+void BoardBuilding::Update()
 {
-	if (catan.drag->IsDraggring()) {		
-		int objType = obj->getObjectType();
-		Building* building = catan.catan_ai->game_state->buildings->getBuilding(point);
+	Sprites::ID sp;
+	if (type == building_types::settelment) {
+		sp = Sprites::ID::redSet;
+	}
+	else {
+		sp = Sprites::ID::redCity;
+	}
+	setSpriteID(static_cast<Sprites::ID>(static_cast<unsigned int>(sp) + catan->catan_ai->getCurrentPlayer()));
+}
 
-		if (((objType == BoardObjects::city) && (building != nullptr) && (building->type == settelment) && (building->id == catan.catan_ai->getCurrentPlayer()))
-			|| ((objType == BoardObjects::settelment) && (building == nullptr))
-			|| ((objType == BoardObjects::cityHooks)))
-		{
-			if (((!catan.catan_ai->game_state->buildings->IsThereBuildingsAround(point))				
-				&& (catan.catan_ai->game_state->roads->IsRoadPointExists(point)))
-				|| (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))) {	
+unsigned int buildingHooks::building_hook_id = 0;
 
-				setSpriteID(obj->getSpriteID());
-				catan.drag->GetObject()->Hide();
-				setFillColor(sf::Color(255, 255, 255, 255));
+buildingHooks::buildingHooks(float x, float y)	
+	: Rectangle(BoardObjects::buildingHooks, sf::Color(), 0, sf::Color(0, 0, 0, 128), x, y,	56, 56, 0)
+{
+	point = building_hook_id++;
+}
 
-			}
+bool buildingHooks::IsDragObjectAcceptable(Object* obj)
+{
+	if (obj != nullptr) {
+		if ((obj->getObjectType() == BoardObjects::buildingHooks) || (obj->getObjectType() == BoardObjects::building)) {
+			return (true);
 		}
 	}
+	return (false);
 }
 
-void cityHooks::OnMouseLeave()
-{
-	if (catan.drag->IsDraggring()){
-		setSpriteID(old_sprite_id);		
-		catan.drag->GetObject()->Show();
-		
-		if (old_sprite_id == Sprites::none) {
-			setFillColor(sf::Color(0, 0, 0, 0));
-		}
-	}	
-}
-
-bool cityHooks::OnStartDrag()
-{
+bool buildingHooks::IsDraggable() const
+{	
 	bool result = false;
-	if ((getSpriteID() != Sprites::ID::none) && (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))) {	
+	//if ((getSpriteId() != Sprites::ID::none) && 
+	if ((type != building_types::none) &&
+		((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) || (sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))) {
 		result = true;
 	}
 	return (result);
 }
 
-void cityHooks::OnEndDrag(bool accepted)
+bool buildingHooks::OnDragDrop(Object* obj)
 {
-	//TODO DELETE!
-	if (catan.mouse_x > 1100) {
-		catan.catan_ai->game_state->buildings->DeleteSettelement(point);
+	obj->Show();
+
+	BoardObjects objType = obj->getObjectType();
+	int oldPoint = -1;
+	int owner = catan->catan_ai->getCurrentPlayer();
+	building_types bType = building_types::none;
+
+	if (objType == BoardObjects::building) {
+		BoardBuilding* b = dynamic_cast<BoardBuilding*>(obj);
+		bType = b->type;
+	}
+	else {
+		if (objType == BoardObjects::buildingHooks) {
+			buildingHooks* b = dynamic_cast<buildingHooks*>(obj);
+			oldPoint = b->point;			
+			Building* building = catan->catan_ai->game_state->buildings->getBuilding(oldPoint);
+			bType = building->type;
+			owner = building->id;
+		}
+		else {
+			return false;
+		}
+	}
+
+	Building* building = catan->catan_ai->game_state->buildings->getBuilding(point);
+
+	if (((bType == building_types::city) && (building != nullptr) && (building->type == building_types::settelment) && (building->id == catan->catan_ai->getCurrentPlayer()))
+		|| ((bType == building_types::settelment) && (building == nullptr) && (!catan->catan_ai->game_state->buildings->IsThereBuildingsAround(point)) && (catan->catan_ai->game_state->roads->IsRoadPointExists(point)))
+		|| (objType == BoardObjects::buildingHooks)
+		|| ((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) || (sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))) {
+			{
+				catan->catan_ai->game_state->buildings->DeleteSettelement(point);
+				catan->catan_ai->game_state->buildings->AddSettelement(point, owner);
+
+				if (bType == building_types::city)
+					catan->catan_ai->game_state->buildings->UpgradeBuilding(point);
+
+				return (true);
+			}
+	}
+
+	return false;
+}
+
+void buildingHooks::OnDragOver(Object* obj)
+{		
+	BoardObjects objType = obj->getObjectType();
+	building_types bType = building_types::none;
+	Sprites::ID sp = Sprites::ID::none;
+
+	if (objType == BoardObjects::building) {
+		BoardBuilding* b = dynamic_cast<BoardBuilding*>(obj);
+		bType = b->type;
+		sp = b->getSpriteId();
+	}
+	else {
+		if (objType == BoardObjects::buildingHooks) {
+			buildingHooks* b = dynamic_cast<buildingHooks*>(obj);
+			bType = b->type;
+			sp = b->getSpriteId();
+		}
+		else {
+			return;
+		}
+	}	
+	
+	Building* building = catan->catan_ai->game_state->buildings->getBuilding(point);
+
+	if (((bType == building_types::city) && (building != nullptr) && (building->type == building_types::settelment) && (building->id == catan->catan_ai->getCurrentPlayer()))
+		|| ((bType == building_types::settelment) && (building == nullptr) && (!catan->catan_ai->game_state->buildings->IsThereBuildingsAround(point)) && (catan->catan_ai->game_state->roads->IsRoadPointExists(point)))
+		|| (objType == BoardObjects::buildingHooks)
+		|| ((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) || (sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))) {
+		{
+				//Rectangle* rect = dynamic_cast<Rectangle*>(obj);
+				setSpriteID(sp);
+				setFillColor(sf::Color(255, 255, 255, 255));
+				obj->Hide();
+		}	
+	}
+}
+
+void buildingHooks::OnMouseLeave()
+{
+	if (Board::drag->IsDraggring()) {
+		setSpriteID(old_sprite_id);
+		Board::drag->get()->Show();
+
+		if (old_sprite_id == Sprites::ID::none) {
+			setFillColor(sf::Color(0, 0, 0, 128));
+		}
+	}
+}
+
+bool buildingHooks::OnEndDrag(bool accepted)
+{
+	if (catan->mouse.x > 1100) {
+		catan->catan_ai->game_state->buildings->DeleteSettelement(point);
 	}
 	else {
 		if (accepted) {
-			catan.catan_ai->game_state->buildings->DeleteSettelement(point);
+			catan->catan_ai->game_state->buildings->DeleteSettelement(point);
+			return false;
 		}
 	}
-	catan.drag->ReturnBack(accepted);
+	return true;
+	//Board::drag->ReturnBack(accepted);
 }
 
-void cityHooks::Update()
+void buildingHooks::Update()
 {
-	if (!catan.drag->IsDraggring()) {
-		Building * building = catan.catan_ai->getBuilding(point);
-		if (building != nullptr) {						
+	if (!Board::drag->IsDraggring()) {
+		Building* building = catan->catan_ai->getBuilding(point);
+		if (building != nullptr) {
 			setFillColor(sf::Color(255, 255, 255, 255));
-			if (building->type == settelment) {
-				setSpriteID(static_cast<Sprites::ID>(Sprites::ID::redSet + building->id));
+			type = building->type;
+			if (type == building_types::settelment) {
+				setSpriteID(static_cast<Sprites::ID>(static_cast<int>(Sprites::ID::redSet) + building->id));				
 			}
-			else if (building->type == city) {
-				setSpriteID(static_cast<Sprites::ID>(Sprites::ID::redCity + building->id));
-			}			
+			else if (type == building_types::city) {
+				setSpriteID(static_cast<Sprites::ID>(static_cast<int>(Sprites::ID::redCity) + building->id));
+			}
 		}
 		else {
 			setSpriteID(Sprites::ID::none);
-			setFillColor(sf::Color(0, 0, 0, 0));
+			setFillColor(sf::Color(0, 0, 0, 128));
+			type = building_types::none;
 		}
-		old_sprite_id = getSpriteID();
+		old_sprite_id = getSpriteId();
 	}
 }
 
-unsigned int roadHooks::road_hook_id = 0;
-
-roadHooks::roadHooks(CatanGUI & _catan, float x, float y, double angle) :
-	RectangleObject(_catan, BoardObjects::roadHooks, sf::Color(), 0,
-		sf::Color(0, 0, 0, 0), x, y, kRoadWidth, kRoadHeight, angle)
+BoardRoad::BoardRoad(Sprites::ID spriteId, float x, float y)
+	: Rectangle(BoardObjects::road, spriteId, x, y, kRoadWidth, kRoadHeight, 0)
 {
-	sf::Vector2f orig = getSize();
-	setOrigin(orig.x / 2, orig.y / 2);
+	TurnDragOn();
+}
 
+bool BoardRoad::OnEndDrag(bool accepted)
+{
+	if (accepted) {
+		return true;	//need to return dragging object back
+	}
+	return false;
+}
+
+void BoardRoad::Update()
+{
+	setSpriteID(static_cast<Sprites::ID>(static_cast<int>(Sprites::ID::redRoad) + catan->catan_ai->getCurrentPlayer()));
+}
+
+roadHooks::roadHooks(float x, float y, double angle)
+	: Rectangle(BoardObjects::roadHooks, sf::Color(), 0, sf::Color(0, 0, 0, 128), x, y, kRoadWidth, kRoadHeight, angle)
+{
 	road_id = road_hook_id++;
 }
 
 bool roadHooks::IsDragObjectAcceptable(Object* obj)
 {
-	bool result = false;
-
 	if (obj != nullptr) {
-		const Sprites::ID _id = obj->getSpriteID();
-		if ((_id >= Sprites::redRoad) && (_id <= Sprites::brownRoad))
-			result = true;
-	}
-
-	return (result);
-}
-
-bool roadHooks::OnDragDrop(Object* obj)
-{	
-	catan.drag->GetObject()->Show();
-	int objType = obj->getObjectType();
-
-	if ((objType == BoardObjects::road) ||
-		((objType == BoardObjects::roadHooks)))
-	{
-		DFSTracePathPoints AllPathPoints(*catan.catan_ai->game_state.get());
-		if ((AllPathPoints.IsItPossibleToBuildRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1]))
-			|| (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))) {
-
-			if (objType == BoardObjects::roadHooks) {
-
-				roadHooks* dropObjId = dynamic_cast<roadHooks*>(obj);
-				unsigned int rId = dropObjId->getRoadId();
-				int newRoadId = catan.catan_ai->game_state->roads->getRoad(road_id_to_from_to[rId][0], road_id_to_from_to[rId][1])->id;
-
-				catan.catan_ai->game_state->roads->DeleteRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1]);
-				catan.catan_ai->game_state->roads->DeleteRoad(road_id_to_from_to[rId][0], road_id_to_from_to[rId][1]);
-				catan.catan_ai->game_state->roads->AddRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1], newRoadId);
-			}
-			else {
-				catan.catan_ai->game_state->roads->DeleteRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1]);
-				catan.catan_ai->game_state->roads->AddRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1], catan.catan_ai->getCurrentPlayer());
-			}
-
-			return true;
-		}
-	}	
-	return false;
-}
-
-void roadHooks::OnDragOver(Object* obj)
-{
-	if (catan.drag->IsDraggring()) {
-		int objType = obj->getObjectType();
-
-		if ((objType == BoardObjects::road) ||
-			((objType == BoardObjects::roadHooks)))
-		{			
-			DFSTracePathPoints AllPathPoints(*catan.catan_ai->game_state.get());			
-			if ((AllPathPoints.IsItPossibleToBuildRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1]))
-				|| (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))) {
-
-				AllPathPoints.PrintAllPathPoints();
-				setSpriteID(obj->getSpriteID());
-				catan.drag->GetObject()->Hide();
-				setFillColor(sf::Color(255, 255, 255, 255));
-
-			}
+		if ((obj->getObjectType() == BoardObjects::roadHooks) || (obj->getObjectType() == BoardObjects::road)) {
+			return (true);
 		}
 	}
+	return (false);
 }
 
-void roadHooks::OnMouseLeave()
-{
-	if (catan.drag->IsDraggring()) {
-		setSpriteID(old_sprite_id);
-		catan.drag->GetObject()->Show();
-
-		if (old_sprite_id == Sprites::none) {
-			setFillColor(sf::Color(0, 0, 0, 0));
-		}
-	}
-}
-
-bool roadHooks::OnStartDrag()
+bool roadHooks::IsDraggable() const
 {
 	bool result = false;
-	if ((getSpriteID() != Sprites::ID::none) && (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))) {
+	if ((getSpriteId() != Sprites::ID::none) && 	
+		((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) || (sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))) {
 		result = true;
 	}
 	return (result);
 }
 
-void roadHooks::OnEndDrag(bool accepted)
+bool roadHooks::OnDragDrop(Object* obj)
 {
-	//TODO DELETE!
-	if (catan.mouse_x > 1100) {
-		catan.catan_ai->game_state->roads->DeleteRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1]);
+	obj->Show();
+	BoardObjects objType = obj->getObjectType();
+	Roads* _roads = catan->catan_ai->game_state->roads.get();
+
+	int newRoadPlayerId;
+	int OldRoadId = -1;	
+
+	switch (objType)
+	{
+	case BoardObjects::road: {
+		newRoadPlayerId = catan->catan_ai->getCurrentPlayer();
+		break;
+	}
+
+	case BoardObjects::roadHooks: {
+		roadHooks* dropObj = dynamic_cast<roadHooks*>(obj);
+		OldRoadId = dropObj->road_id;
+		Road* rd = _roads->getRoad(road_id_to_from_to[dropObj->road_id][0], road_id_to_from_to[dropObj->road_id][1]);
+		newRoadPlayerId = rd->id;
+		break;
+	}
+
+	default:
+		return false;
+	}
+
+	DFSTracePathPoints AllPathPoints(*catan->catan_ai->game_state.get(), newRoadPlayerId);
+	if ((AllPathPoints.IsItPossibleToBuildRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1]))
+		|| (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) || (sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))) {
+
+		if (OldRoadId >= 0)
+			_roads->DeleteRoad(road_id_to_from_to[OldRoadId][0], road_id_to_from_to[OldRoadId][1]);
+		_roads->DeleteRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1]);
+		_roads->AddRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1], newRoadPlayerId);
+
+		return true;
+	}	
+
+	return false;
+}
+
+void roadHooks::OnDragOver(Object* obj)
+{	
+	BoardObjects objType = obj->getObjectType();	
+	int newRoadPlayerId = -1;
+
+	switch (objType)
+	{
+	case BoardObjects::road: {
+		newRoadPlayerId = catan->catan_ai->getCurrentPlayer();
+		break;
+	}
+
+	case BoardObjects::roadHooks: {
+		roadHooks* dropObj = dynamic_cast<roadHooks*>(obj);				
+		newRoadPlayerId = catan->catan_ai->game_state->roads->getRoad(road_id_to_from_to[dropObj->road_id][0], road_id_to_from_to[dropObj->road_id][1])->id;
+		break;
+	}
+
+	default:
+		return;
+	}
+
+	DFSTracePathPoints AllPathPoints(*catan->catan_ai->game_state.get(), newRoadPlayerId);
+	if ((AllPathPoints.IsItPossibleToBuildRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1]))
+		|| (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) || (sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))) {
+		
+		Rectangle* rect = dynamic_cast<Rectangle*>(obj);
+		setSpriteID(rect->getSpriteId());
+		obj->Hide();
+		setFillColor(sf::Color(255, 255, 255, 255));
+	}
+}
+
+void roadHooks::OnMouseLeave()
+{
+	if (Board::drag->IsDraggring()) {
+		setSpriteID(old_sprite_id);
+		Board::drag->get()->Show();
+
+		if (old_sprite_id == Sprites::ID::none) {
+			setFillColor(sf::Color(0, 0, 0, 128));
+		}
+	}
+}
+
+bool roadHooks::OnEndDrag(bool accepted)
+{
+	if (catan->mouse.x > 1100) {
+		catan->catan_ai->game_state->roads->DeleteRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1]);
 	}
 	else {
 		if (accepted) {
-			catan.catan_ai->game_state->roads->DeleteRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1]);
+			catan->catan_ai->game_state->roads->DeleteRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1]);
+			return false;
 		}
 	}
-	catan.drag->ReturnBack(accepted);
+	return true;
 }
 
 void roadHooks::Update()
 {
-	if (!catan.drag->IsDraggring()) {
-		Road* road = catan.catan_ai->game_state->roads->getRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1]);
+	if (!Board::drag->IsDraggring()) {
+		Road* road = catan->catan_ai->game_state->roads->getRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1]);
 		if (road != nullptr) {
-			setFillColor(sf::Color(255, 255, 255, 255));			
-			setSpriteID(static_cast<Sprites::ID>(Sprites::ID::redRoad + road->id));
+			setFillColor(sf::Color(255, 255, 255, 255));
+			setSpriteID(static_cast<Sprites::ID>(static_cast<int>(Sprites::ID::redRoad) + road->id));
 		}
 		else {
 			setSpriteID(Sprites::ID::none);
-			setFillColor(sf::Color(0, 0, 0, 0));
+			setFillColor(sf::Color(0, 0, 0, 128));
 		}
-		old_sprite_id = getSpriteID();
+		old_sprite_id = getSpriteId();
 	}
-}
-
-City::City(CatanGUI & _catan, Sprites::ID spriteId, float x, float y):
-	RectangleObject(_catan, BoardObjects::city, spriteId, 56, 56, x, y, 0)
-{
-	sf::Vector2f orig = getSize();
-	setOrigin(orig.x/2, orig.y/2);
-}
-
-void City::Update()
-{
-	setSpriteID(static_cast<Sprites::ID>(Sprites::ID::redCity + catan.catan_ai->getCurrentPlayer()));
-}
-
-Settelment::Settelment(CatanGUI& _catan, Sprites::ID spriteId, float x, float y):
-	RectangleObject(_catan, BoardObjects::settelment, spriteId, 56, 56, x, y, 0)
-{
-	sf::Vector2f orig = getSize();
-	setOrigin(orig.x / 2, orig.y / 2);
-}
-
-void Settelment::Update()
-{
-	setSpriteID(static_cast<Sprites::ID>(Sprites::ID::redSet + catan.catan_ai->getCurrentPlayer()));
-}
-
-BoardRoad::BoardRoad(CatanGUI& _catan, Sprites::ID spriteId, float x, float y) :
-	RectangleObject(_catan, BoardObjects::road, spriteId, 16, 102, x, y, 0)
-{
-	sf::Vector2f orig = getSize();
-	setOrigin(orig.x / 2, orig.y / 2);
-}
-
-void BoardRoad::Update()
-{
-	setSpriteID(static_cast<Sprites::ID>(Sprites::ID::redRoad + catan.catan_ai->getCurrentPlayer()));
-}
-
-Label::Label(CatanGUI& _catan, float x, float y, double angle, const sf::Color& textColor, const std::string& text, int textSize, objButtonEvents event)
-	: Object(_catan, BoardObjects::label)
-{
-	font.loadFromFile(kFont);
-	setFont(font);
-	setString(text);
-	setCharacterSize(textSize);
-	setFillColor(textColor);
-	sf::Text::setPosition(x, y);
-	setRotation(angle);
-}
-
-void Label::OnDraw()
-{
-	catan.GetWindow().draw(*this);
 }

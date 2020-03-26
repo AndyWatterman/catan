@@ -10,14 +10,10 @@ CatanGUI::CatanGUI() : Window(sf::VideoMode(1900, 1000), "Catan GUI v0.2a", sf::
 	LoadImages();
 	LoadTextures();
 	LoadSprites();
-
-	//catan_ai = std::unique_ptr<CatanAi>(new CatanAi(_board));
+	LoadFonts();
+	
 	catan_ai = std::unique_ptr<CatanAi>(new CatanAi(_board));
-
-	board = std::unique_ptr<Board>(new Board(*this));
-	drag = std::unique_ptr<Drag>(new Drag(*this));	
-
-	board->UpdateHexesAndDices();
+	board = std::unique_ptr<Board>(new Board());
 }
 
 void CatanGUI::processEvents()
@@ -28,105 +24,21 @@ void CatanGUI::processEvents()
 		if ((event.type == sf::Event::MouseButtonPressed) ||
 			(event.type == sf::Event::MouseButtonReleased))
 		{
-			SetMouseXY(event.mouseButton.x, event.mouseButton.y);	//save mouse coordinates			
-
-			handleMouseEvent(event.mouseButton.x, event.mouseButton.y,
-				event.mouseButton.button, event.type);
+			mouse.x = event.mouseButton.x;
+			mouse.y = event.mouseButton.y;
 		}
 
 		if (event.type == sf::Event::MouseMoved)
 		{
-			SetMouseXY(event.mouseMove.x, event.mouseMove.y);	//save mouse coordinates			
+			mouse.x = event.mouseMove.x;
+			mouse.y = event.mouseMove.y;
+		}		
 
-			handleMouseEvent(event.mouseMove.x, event.mouseMove.y,
-				event.mouseButton.button, event.type);
-		}
-
-		if (event.type == sf::Event::MouseLeft) {
-			handleMouseEvent(NULL, NULL, event.mouseButton.button, event.type);
-		}
+		board->handleMouseEvent(event);		//process events
 
 		if (event.type == sf::Event::Closed)
 			Window.close();
 	}
-}
-
-void CatanGUI::handleMouseEvent(int x, int y, sf::Mouse::Button button, sf::Event::EventType event)
-{
-	objUnderCursor = board->GetObject(x, y);
-
-	if (event == sf::Event::MouseButtonPressed) {
-		//if (button == sf::Mouse::Left) {
-			if (objUnderCursor != nullptr) {
-				objPressed = objUnderCursor;
-				objPressed->OnMouseDown(x, y, button);
-			}
-		//}
-	}
-
-	if (event == sf::Event::MouseButtonReleased) {
-		if (objPressed != nullptr) {	//
-			if (drag->IsDraggring()) {
-				bool acceptedDrag = false;
-
-				if (objUnderCursor != nullptr) {
-					acceptedDrag = objUnderCursor->OnDragDrop(drag->GetObject());
-				}
-
-				drag->Stop(acceptedDrag);
-			}
-			else {
-				objPressed->OnMouseUp(button);
-			}
-			objPressed = nullptr;
-		}
-	}
-
-	if (event == sf::Event::MouseMoved) {
-
-		if (objPressed != nullptr) {
-			if (!drag->IsDraggring()) {
-				if (objPressed->OnStartDrag()) {	//true if object draggable
-					drag->SetObject(objPressed);
-					drag->Start();
-				}
-				else {
-					if (objUnderCursor != nullptr) {
-						objUnderCursor->OnMouseMove(x, y);
-					}
-				}
-			}
-			else {
-				if (objUnderCursor != nullptr) {
-					objUnderCursor->OnDragOver(drag->GetObject());
-				}
-				objPressed->OnDrag();
-			}
-		}
-		else {
-			if (objUnderCursor != nullptr) {
-				objUnderCursor->OnMouseMove(x, y);
-			}
-		}
-
-		if ((lastobjUnderCursor != objUnderCursor) && (lastobjUnderCursor != nullptr)) {
-			lastobjUnderCursor->OnMouseLeave();
-		}
-	}
-
-	if (event == sf::Event::MouseLeft) {
-		if (objPressed != nullptr) {
-			if (drag->IsDraggring()) {
-				drag->Stop();
-			}
-			else {
-				objPressed->OnMouseUp(button);
-			}
-			objPressed = nullptr;
-		}
-	}
-
-	lastobjUnderCursor = objUnderCursor;
 }
 
 void CatanGUI::LoadSprites()
@@ -150,18 +62,29 @@ void CatanGUI::LoadImages()
 {
 	//loading main images to get access to specific pixels
 
-	images.LoadFromFile(Resources::all, ALL_SPRITES_FILENAME);
-	images.LoadFromFile(Resources::background, BG_TEXTURE_FILENAME);
+	images.LoadFromFile(Resources::ID::all, ALL_SPRITES_FILENAME);
+	images.LoadFromFile(Resources::ID::background, BG_TEXTURE_FILENAME);
 
+}
+
+void CatanGUI::LoadFonts()
+{
+	WCHAR path[MAX_PATH * 2];
+	DWORD size = GetModuleFileNameW(NULL, path, MAX_PATH * 2);
+	
+	std::filesystem::path p(path);
+	p.remove_filename();
+	p.append(kFont);
+	font.loadFromFile(p.string());	
 }
 
 void CatanGUI::LoadTextures()
 {
 	//loading textures
 
-	textures.LoadFromFile(Resources::all, ALL_SPRITES_FILENAME);
-	textures.LoadFromFile(Resources::background, BG_TEXTURE_FILENAME);
-	textures.get(Resources::all).setSmooth(true);
+	textures.LoadFromFile(Resources::ID::all, ALL_SPRITES_FILENAME);
+	textures.LoadFromFile(Resources::ID::background, BG_TEXTURE_FILENAME);
+	textures.get(Resources::ID::all).setSmooth(true);
 }
 
 void CatanGUI::SetWindowOptions()
@@ -174,6 +97,8 @@ void CatanGUI::SetWindowOptions()
 
 void CatanGUI::start()
 {
+	board->Init();
+
 	while (Window.isOpen())
 	{
 		processEvents();
@@ -182,20 +107,20 @@ void CatanGUI::start()
 	}
 }
 
+const sf::Font& CatanGUI::getFont()
+{
+	return (font);
+}
+
 void CatanGUI::render()
 {
-	Window.clear();
-
-	//draw a background
-	Window.draw(sprites.get(Sprites::background));
-
+	Window.clear();	
+	Window.draw(sprites.get(Sprites::ID::background));	//draw a background
 	board->Draw();
-
 	Window.display();
 }
 
 void CatanGUI::update()
-{
-	drag->Update();
+{	
 	board->Update();
 }

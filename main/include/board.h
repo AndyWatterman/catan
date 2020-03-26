@@ -3,23 +3,27 @@
 #include "CatanGUI.h"
 
 class Board {
-private:
-	CatanGUI & catan;
+private:	
 	std::map<unsigned int, std::unique_ptr<Object>> Objects;
 	
-	//template <typename T, typename... Types>
-	//friend void addObject(T objType, Types... args);
-
-	void CreateStandartObjects();	
+	Object* objUnderCursor = nullptr;
+	Object* lastobjUnderCursor = nullptr;
+	Object* objPressed = nullptr;	
 
 public:
-	Board(CatanGUI & _catan);
+	Board();
+	~Board() = default;
+
+	static std::unique_ptr<Drag> drag;
 
 	template<typename T,typename ...Types>
 		void addObject(Types&& ...args);
 
 	Object* GetObject(int x, int y);
+
+	void Init();
 	void Draw();
 	void Update();
-	void UpdateHexesAndDices();
+
+	void handleMouseEvent(sf::Event);	
 };

@@ -1,29 +1,25 @@
 #pragma once
 
-//#include "CatanGUI.h"
-
 class Drag {
 private:
-	CatanGUI & catan;
-
 	bool dragging = false;
 	bool going_back = false;
 
 	sf::Vector2f back_position;
 	Object* source_object = nullptr;
+	sf::Transformable* transformable = nullptr;
 
 	const int speed = 60;
 
 public:
-	Drag(CatanGUI & _catan);
-	Drag() = delete;	
+	Drag() = default;
+	~Drag() = default;
 
-	Object* GetObject() { return (source_object); };
-	void SetObject(Object* obj);
+	Object* get() { return (source_object); };	
 	bool IsDraggring() { return (dragging); };
 
 	void ReturnBack(bool accepted = false);
-	void Start();
+	void Start(Object* obj);
 	void Stop(bool accepted = false);
 	void Update();
 };
