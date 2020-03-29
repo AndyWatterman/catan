@@ -19,12 +19,14 @@ const int CatanAi::getCurrentPlayer() const
 	return (game_state->GetCurrentPlayer());
 }
 
-Building * CatanAi::getBuilding(int point) const
+/*Building * CatanAi::getBuilding(int point) const
 {
 	return (game_state->buildings->getBuilding(point));
-}
+}*/
 
 void CatanAi::nextTurn()
 {
-	game_state->nextTurn();
+	if (getPlayersCount()) {
+		game_state->nextTurn();
+	}
 }

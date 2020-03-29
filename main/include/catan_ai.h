@@ -15,13 +15,12 @@ private:
 public:
 	//CatanAi(int players_count);
 	CatanAi(::_Board & b);
-	//CatanAi() = default;	
+	//CatanAi() = default;
 
 	std::unique_ptr<GameState> game_state;
 
 	const int getPlayersCount() const;
-	const int getCurrentPlayer() const;
-	Building * getBuilding(int point) const;
+	const int getCurrentPlayer() const;	
 
 	void nextTurn();
 };

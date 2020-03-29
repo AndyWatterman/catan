@@ -172,10 +172,24 @@ public:
 };
 
 class Label : public Object, public sf::Text {
-public:
-	Label(float x, float y, double angle, const sf::Color& textColor, const std::string& text, unsigned int textSize);	
+protected:
+	sf::Color _textColor;
 
-	void OnDraw() override;
+public:
+	Label(float x, float y, double angle, const sf::Color& textColor, const std::string& text, unsigned int textSize);
+	virtual ~Label() = default;
+
+	virtual void OnDraw() override;
+};
+
+class lRoadLabel : public Label {
+private:
+	int playerId = -1;
+public:
+	using Label::Label;
+	lRoadLabel(float x, float y, double angle, const sf::Color& textColor, const std::string& text, unsigned int textSize, int playerId);
+
+	void Update() override;
 };
 
 class BoardBuilding : public Rectangle {

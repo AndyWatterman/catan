@@ -41,7 +41,7 @@ void Board::Init()
 	addObject<PlayerContainer>(1397+250, 3+644/2);	
 
 	//label longest road
-	addObject<Label>(1641, 14, 0, sf::Color(100, 228, 255, 255), "L. Road (0)", 16);
+	addObject<lRoadLabel>(1641, 14, 0, sf::Color(100, 228, 255, 255), "L. Road (0)", 16);
 
 	//button next turn
 	addObject<Btn>(1773+115/2, 595+44/2, 115, 44, 0,

@@ -13,7 +13,7 @@ void Roads::AddRoad(int from, int to, int id)
 {
 	roads.push_back(Road({ from, to, id }));
 	(*pGameState->players)[id].AddRoad();
-	UpdateSpecificRoadLength(id);	
+	UpdateSpecificRoadLength(id);
 }
 
 void Roads::AddRoad(const Road & road)
@@ -27,7 +27,10 @@ void Roads::DeleteRoad(int from, int to)
 {
 	for (auto it = roads.begin(); it != roads.end(); it++) {
 		if (((it->from == from) || (it->from == to)) && ((it->to == from) || (it->to == to))) {
+			int pId = it->id;
 			roads.erase(it);
+			//UpdateSpecificRoadLength(pId);
+			UpdateRoadsLength();
 			break;
 		}
 	}
@@ -273,12 +276,12 @@ void DFSTracePathPoints::PrintAllPathPoints() const
 int DFSSearchLongPath::GetLongestPathNoRecursive(int start_point) {
 
 	//это чтобы супер длинные пути провер¤ть
-//#ifdef DEBUG
-//	array<int, 40> current_path, next_points_size, next_points;
-//#else	
+#ifdef DEBUG
+	std::array<int, 40> current_path, next_points_size, next_points;
+#else	
 	std::array<int, 16> current_path, next_points_size;
 	std::array<int, 36> next_points;
-//#endif
+#endif
 
 	current_path.fill(0);
 	next_points.fill(0);

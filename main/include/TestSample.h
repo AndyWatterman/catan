@@ -4,16 +4,16 @@ Sample TestSample {
 	3, -1, -1,
 
 	//std::vector<Building> buildings;
-	{ {
+	{ /*{
 		{ 19, 0, building_types::settelment },
 		{ 28, 0, building_types::settelment },
 		{ 44, 0, building_types::city },
 		{ 8, 1, building_types::settelment },
 		{ 31, 1, building_types::settelment }
-	} },
+	} */},
 	
 	//std::vector<Road> roads;
-	{ {
+	{ /*{
 		{ 19, 25, 0 },
 		{ 28, 34, 0 },
 		{ 34, 29, 0 },
@@ -27,7 +27,7 @@ Sample TestSample {
 		{ 5, 2, 1 },
 		{ 2, 6, 1 },
 		{ 31, 25, 1 }
-	} },
+	} */},
 
 	{ {
 		//Player 0
@@ -53,7 +53,7 @@ Sample TestSample {
 			{ 0, 0, 0, 0, 0 },	//активные карты
 			{ 0, 0, 0, 0, 0 },	//использованные карты
 			false				//dev_card_has_been_played								
-		}/*,
+		},
 
 		//Player 3
 		{
@@ -66,7 +66,7 @@ Sample TestSample {
 			{ 0, 0, 0, 0, 0 },	//использованные карты
 			false				//dev_card_has_been_played
 			//0, 0				//big_army, long_road
-		}*/
+		}
 		} }
 
 	//R5
