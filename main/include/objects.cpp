@@ -6,8 +6,8 @@ unsigned int BoardHex::hex_id = 0;
 unsigned int BoardBorder::border_id = 0;
 unsigned int roadHooks::road_hook_id = 0;
 
-Object::Object(BoardObjects _type) :
-	objectType(_type), objectId(ObjectIDs)
+Object::Object(BoardObjects _type, std::string& name) :
+	objectType(_type), objectId(ObjectIDs), name(name)
 {
 	ObjectIDs++;
 }
@@ -119,8 +119,8 @@ void Object::Update()
 {
 }
 
-BoardHex::BoardHex(float x, float y):
-	Rectangle(BoardObjects::hex, Sprites::ID::hex_free, x, y, 176, 200, 0)
+BoardHex::BoardHex(std::string name, float x, float y):
+	Rectangle(BoardObjects::hex, name, Sprites::ID::hex_free, x, y, 176, 200, 0)
 {
 	current_hex_id = hex_id++;
 		
@@ -208,12 +208,12 @@ void BoardHex::setDice(int _dice)
 	}
 }
 
-Btn::Btn(float x, float y, int width, int height, float angle,
+Btn::Btn(std::string name, float x, float y, int width, int height, float angle,
 	const sf::Color& OutlineColor, float OutlineThickness, const sf::Color& FillColor,
 	const sf::Color& HoverFillColor, const sf::Color& HoverOutlineColor, const sf::Color& HoverTextColor,
 	const sf::Color& PressedFillColor, const sf::Color& PressedOutlineColor, const sf::Color& PressedTextColor,
 	const sf::Color& textColor, const std::string& text, int textSize, objButtonEvents event) :
-	Rectangle(BoardObjects::button, OutlineColor, OutlineThickness, FillColor,x, y, width, height, angle),
+	Rectangle(BoardObjects::button, name, OutlineColor, OutlineThickness, FillColor,x, y, width, height, angle),
 
 	OutlineColor(OutlineColor), FillColor(FillColor), textColor(textColor), 
 	HoverFillColor(HoverFillColor), HoverOutlineColor(HoverOutlineColor), HoverTextColor(HoverTextColor),
@@ -224,12 +224,6 @@ Btn::Btn(float x, float y, int width, int height, float angle,
 	caption.setString(text);
 	caption.setCharacterSize(textSize);
 	caption.setFillColor(textColor);
-
-	/*const sf::FloatRect bounds(caption.getLocalBounds());
-	const sf::Vector2f box(Rectangle::getSize());	
-	caption.setRotation(angle);	
-	caption.setOrigin((bounds.width - box.x) / 2 + bounds.left, (bounds.height - box.y) / 2 + bounds.top);
-	caption.setPosition(x, y);*/
 
 	const sf::FloatRect bounds(caption.getLocalBounds());
 	caption.setOrigin(bounds.width / 2, bounds.height / 2 + bounds.top);
@@ -306,8 +300,8 @@ void Btn::processBtnEvent(objButtonEvents event)
     }
 }
 
-BoardBorder::BoardBorder(float x, float y, double angle):
-	Rectangle(BoardObjects::borders, Sprites::ID::none, x, y, 153, 547, angle)
+BoardBorder::BoardBorder(std::string name, float x, float y, double angle):
+	Rectangle(BoardObjects::borders, name, Sprites::ID::none, x, y, 153, 547, angle)
 {	
 	current_border_id = border_id++;
 	setOrigin(0, 0);
@@ -396,10 +390,10 @@ void BoardBorder::Update()
 	}
 }
 
-Rectangle::Rectangle(BoardObjects _type,
+Rectangle::Rectangle(BoardObjects _type, std::string name, 
 	sf::Color OutlineColor, float OutlineThickness, sf::Color FillColor,
 	float x, float y, int width, int height, float angle)
-	:Object(_type)
+	:Object(_type, name)
 {
 	setSize(sf::Vector2f(width, height));
 	setRotation(angle);
@@ -412,8 +406,8 @@ Rectangle::Rectangle(BoardObjects _type,
 	setOrigin(orig.x / 2, orig.y / 2);
 }
 
-Rectangle::Rectangle(BoardObjects _type, Sprites::ID sprite, float x, float y, int width, int height, float angle)
-	:Object(_type)
+Rectangle::Rectangle(BoardObjects _type, std::string name, Sprites::ID sprite, float x, float y, int width, int height, float angle)
+	:Object(_type, name)
 {
 	setSize(sf::Vector2f(width, height));
 	setRotation(angle);
@@ -443,10 +437,9 @@ void Rectangle::setSpriteID(Sprites::ID sprite)
 	}	
 }
 
-PlayerContainer::PlayerContainer(float x, float y) :
-	Rectangle(BoardObjects::rectangle, sf::Color(85, 85, 85, 255), 3,
-		kPlayerColors[catan->catan_ai->getCurrentPlayer()], x, y,
-		kPlayerContainerWidth, kPlayerContainerHeight, 0)
+PlayerContainer::PlayerContainer(std::string name, float x, float y, int width, int height) :
+	Rectangle(BoardObjects::rectangle, name, sf::Color(85, 85, 85, 255), 3,
+		kPlayerColors[catan->catan_ai->getCurrentPlayer()], x, y, width, height, 0)
 {
 	
 }
@@ -496,13 +489,13 @@ void Rectangle::OnDraw()
 	catan->GetWindow().draw(*this);
 }
 
-void PlayerContainer::Update()
+/*void PlayerContainer::Update()
 {
 	setFillColor(kPlayerColors[catan->catan_ai->getCurrentPlayer()]);
-}
+}*/
 
-Label::Label(float x, float y, double angle, const sf::Color& textColor, const std::string& text, unsigned int textSize)
-	: Object(BoardObjects::label)
+Label::Label(std::string name, float x, float y, double angle, const sf::Color& textColor, const std::string& text, unsigned int textSize)
+	: Object(BoardObjects::label, name)
 {	
 	setFont(catan->getFont());
 	setString(text);
@@ -518,8 +511,8 @@ void Label::OnDraw()
 	catan->GetWindow().draw(*this);
 }
 
-BoardBuilding::BoardBuilding(Sprites::ID spriteId, float x, float y)
-	: Rectangle(BoardObjects::building, spriteId, x, y, 56, 56, 0)
+BoardBuilding::BoardBuilding(std::string name, Sprites::ID spriteId, float x, float y)
+	: Rectangle(BoardObjects::building, name, spriteId, x, y, 56, 56, 0)
 {
 	if ((spriteId >= Sprites::ID::redSet) && (spriteId <= Sprites::ID::brownSet)) {
 		type = building_types::settelment;
@@ -553,8 +546,8 @@ void BoardBuilding::Update()
 
 unsigned int buildingHooks::building_hook_id = 0;
 
-buildingHooks::buildingHooks(float x, float y)	
-	: Rectangle(BoardObjects::buildingHooks, sf::Color(), 0, sf::Color(0, 0, 0, 0), x, y,	56, 56, 0)
+buildingHooks::buildingHooks(std::string name, float x, float y)
+	: Rectangle(BoardObjects::buildingHooks, name, sf::Color(), 0, sf::Color(0, 0, 0, 0), x, y,	56, 56, 0)
 {
 	point = building_hook_id++;
 }
@@ -713,8 +706,8 @@ void buildingHooks::Update()
 	}
 }
 
-BoardRoad::BoardRoad(Sprites::ID spriteId, float x, float y)
-	: Rectangle(BoardObjects::road, spriteId, x, y, kRoadWidth, kRoadHeight, 0)
+BoardRoad::BoardRoad(std::string name, Sprites::ID spriteId, float x, float y)
+	: Rectangle(BoardObjects::road, name, spriteId, x, y, kRoadWidth, kRoadHeight, 0)
 {
 	TurnDragOn();
 }
@@ -732,8 +725,8 @@ void BoardRoad::Update()
 	setSpriteID(static_cast<Sprites::ID>(static_cast<int>(Sprites::ID::redRoad) + catan->catan_ai->getCurrentPlayer()));
 }
 
-roadHooks::roadHooks(float x, float y, double angle)
-	: Rectangle(BoardObjects::roadHooks, sf::Color(), 0, sf::Color(0, 0, 0, 0), x, y, kRoadWidth, kRoadHeight, angle)
+roadHooks::roadHooks(std::string name, float x, float y, double angle)
+	: Rectangle(BoardObjects::roadHooks, name, sf::Color(), 0, sf::Color(0, 0, 0, 0), x, y, kRoadWidth, kRoadHeight, angle)
 {
 	road_id = road_hook_id++;
 }
@@ -876,29 +869,65 @@ void roadHooks::Update()
 	}
 }
 
-lRoadLabel::lRoadLabel(float x, float y, double angle, const sf::Color& textColor, const std::string& text, unsigned int textSize, int _playerId)
-	:Label(x, y, angle,textColor, text, textSize), playerId(_playerId)
-{}
-
-void lRoadLabel::Update()
+UpdateAbstractClass::UpdateAbstractClass(std::string name)
+	:Object(BoardObjects::abstract, name)
 {
-	std::ostringstream o;
-	Players* players = catan->catan_ai->game_state->players.get();
-	//(*players)[road.id].AddRoad();
-	//o << "L. Road (" << (*players)[players->GetLargestRoadId()].GetMaxRoadLength() <<")";
-	int pId;
-	if (playerId == -1) {
-		pId = catan->catan_ai->getCurrentPlayer();
+}
+
+void UpdateAbstractClass::OnDraw()
+{
+}
+
+void UpdateAbstractClass::Update()
+{
+	if (!IsActive())
+		return;
+
+	////////////////////////////////////////////////////////////
+	/// Update color of player containers
+	////////////////////////////////////////////////////////////
+	{
+		auto currId = catan->catan_ai->getCurrentPlayer();		
+		PlayerContainer* pc1;
+
+		for (auto i = 0, currContId = 0; i < catan->catan_ai->getPlayersCount(); i++) {
+			if (i != currId) {
+				pc1 = dynamic_cast<PlayerContainer*>(catan->board->GetObjectByName("PlayerContainer" + std::to_string(currContId)));
+				currContId++;
+			}
+			else {
+				pc1 = dynamic_cast<PlayerContainer*>(catan->board->GetObjectByName("PlayerContainer"));
+			}
+			pc1->setFillColor(kPlayerColors[i]);				
+		}
 	}
-	else {
-		pId = playerId;
-	}
-	o << "L. Road (" << ((catan->catan_ai->getPlayersCount()) ? ((*players)[pId].GetMaxRoadLength()) : 0) <<")";
-	setString(o.str());
-	if (pId == (*players).GetLargestRoadId()) {
-		setFillColor(sf::Color(228, 255, 0, 255));
-	}
-	else {
-		setFillColor(_textColor);
+
+	////////////////////////////////////////////////////////////
+	/// Update length of player largest roads
+	////////////////////////////////////////////////////////////
+
+	{
+		auto players = catan->catan_ai->game_state->players.get();
+		auto currId = catan->catan_ai->getCurrentPlayer();
+		Label* pc1;
+
+		for (auto i = 0, currContId = 0; i < catan->catan_ai->getPlayersCount(); i++) {	
+
+			if (i != currId) {
+				pc1 = dynamic_cast<Label*>(catan->board->GetObjectByName("LabelLargestRoad" + std::to_string(currContId)));
+				currContId++;
+			}
+			else {
+				pc1 = dynamic_cast<Label*>(catan->board->GetObjectByName("LabelLargestRoad"));
+			}
+
+			pc1->setString("L. Road (" + std::to_string(((catan->catan_ai->getPlayersCount()) ? ((*players)[i].GetMaxRoadLength()) : 0)) + ")");
+			if (i == (*players).GetLargestRoadId()) {
+				pc1->setFillColor(sf::Color(228, 255, 0, 255));
+			}
+			else {
+				pc1->setFillColor(pc1->_textColor);
+			}			
+		}		
 	}
 }

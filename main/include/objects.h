@@ -16,7 +16,7 @@ private:
 		draggable = false;
 
 public:
-	explicit Object(BoardObjects _type);
+	Object(BoardObjects _type, std::string& name);
 	Object() = delete;
 	virtual ~Object() = default;
 
@@ -33,6 +33,8 @@ public:
 
 	unsigned int getObjectId() const;
 	BoardObjects getObjectType() const;	
+
+	const std::string name;
 
 public:
 
@@ -61,11 +63,11 @@ private:
 
 public:
 	//Rectangle with outline, buttons, etc..
-	Rectangle(BoardObjects _type, sf::Color OutlineColor, float OutlineThickness, sf::Color FillColor,
+	Rectangle(BoardObjects _type, std::string name, sf::Color OutlineColor, float OutlineThickness, sf::Color FillColor,
 		float x, float y, int width, int height, float angle);
 
 	//Only sprite
-	Rectangle(BoardObjects _type, Sprites::ID spriteId,
+	Rectangle(BoardObjects _type, std::string name, Sprites::ID spriteId,
 		float x, float y, int width, int height, float angle);
 
 	virtual ~Rectangle() = default;
@@ -82,8 +84,6 @@ public:
 };
 
 class BoardHex : public Rectangle {
-	static unsigned int hex_id;
-
 private:
 	unsigned int current_hex_id;
 	unsigned int dice = 0;
@@ -92,8 +92,9 @@ private:
 	bool isPressed = false;
 
 public:
-	BoardHex(float x, float y);
+	BoardHex(std::string name, float x, float y);
 
+	static unsigned int hex_id;
 	unsigned int getCurrentHexId() const;
 
 	int getDice() const;
@@ -112,10 +113,22 @@ class PlayerContainer : public Rectangle {
 private:
 
 public:
-	explicit PlayerContainer(float x, float y);
+	PlayerContainer(std::string name, float x, float y, int width, int height);
 	~PlayerContainer() = default;
 	PlayerContainer() = delete;
 	
+	//void Update() override;
+};
+
+class UpdateAbstractClass : public Object {
+private:
+
+public:
+	UpdateAbstractClass(std::string name);
+	~UpdateAbstractClass() = default;
+	UpdateAbstractClass() = delete;
+
+	void OnDraw() override;
 	void Update() override;
 };
 
@@ -128,7 +141,7 @@ private:
 	bool isPressed = false;
 
 public:
-	BoardBorder(float x, float y, double angle);
+	BoardBorder(std::string name, float x, float y, double angle);
 
 	unsigned int getCurrentBorderId() const;
 	
@@ -153,7 +166,7 @@ private:
 	std::string text;
 
 public:
-	Btn(float x, float y, int width, int height, float angle,
+	Btn(std::string name, float x, float y, int width, int height, float angle,
 		const sf::Color& OutlineColor, float OutlineThickness, const sf::Color& FillColor,
 		const sf::Color& HoverFillColor, const sf::Color& HoverOutlineColor, const sf::Color& HoverTextColor,
 		const sf::Color& PressedFillColor, const sf::Color& PressedOutlineColor, const sf::Color& PressedTextColor,
@@ -173,28 +186,18 @@ public:
 
 class Label : public Object, public sf::Text {
 protected:
-	sf::Color _textColor;
-
 public:
-	Label(float x, float y, double angle, const sf::Color& textColor, const std::string& text, unsigned int textSize);
+	Label(std::string name, float x, float y, double angle, const sf::Color& textColor, const std::string& text, unsigned int textSize);
 	virtual ~Label() = default;
+
+	sf::Color _textColor;
 
 	virtual void OnDraw() override;
 };
 
-class lRoadLabel : public Label {
-private:
-	int playerId = -1;
-public:
-	using Label::Label;
-	lRoadLabel(float x, float y, double angle, const sf::Color& textColor, const std::string& text, unsigned int textSize, int playerId);
-
-	void Update() override;
-};
-
 class BoardBuilding : public Rectangle {
 public:
-	BoardBuilding(Sprites::ID spriteId, float x, float y);
+	BoardBuilding(std::string name, Sprites::ID spriteId, float x, float y);
 	BoardBuilding() = delete;
 	~BoardBuilding() = default;
 	
@@ -205,16 +208,15 @@ public:
 };
 
 class buildingHooks : public Rectangle {
-	static unsigned int building_hook_id;
-
 private:	
 	Sprites::ID old_sprite_id = Sprites::ID::none;	
 
 public:
-	buildingHooks(float x, float y);
+	buildingHooks(std::string name, float x, float y);
 	~buildingHooks() = default;
 	buildingHooks() = delete;
 
+	static unsigned int building_hook_id;
 	building_types type = building_types::none;	//settelment or city
 	unsigned int point;	//=building.point
 
@@ -232,7 +234,7 @@ public:
 class BoardRoad : public Rectangle {
 private:
 public:
-	BoardRoad(Sprites::ID spriteId, float x, float y);
+	BoardRoad(std::string name, Sprites::ID spriteId, float x, float y);
 	BoardRoad() = delete;
 	~BoardRoad() = default;
 
@@ -241,17 +243,16 @@ public:
 };
 
 class roadHooks : public Rectangle {
-	static unsigned int road_hook_id;
-
 private:	
 	Sprites::ID old_sprite_id = Sprites::ID::none;
 
 public:
-	roadHooks(float x, float y, double angle);
+	roadHooks(std::string name, float x, float y, double angle);
 	~roadHooks() = default;
-	roadHooks() = delete;
+	roadHooks() = delete;	
 	
 	unsigned int road_id;	//=road.point
+	static unsigned int road_hook_id;
 
 	bool IsDragObjectAcceptable(Object* obj) override;
 	bool IsDraggable() const override;

@@ -255,6 +255,7 @@ enum class BoardObjects : unsigned int {
 	button,
 	label,
 	rectangle,
+	abstract,
 	none
 };
 
