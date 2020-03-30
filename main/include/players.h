@@ -5,9 +5,9 @@
 struct _Player {
 	std::array<int, kResCount> resources;		//player's resources
 	std::array<int, kCardCount> cards;			//development cards on hand
-	std::array<int, kCardCount> active_cards;	//active dev cards
+	std::array<int, kCardCount> active_cards;	//active dev cards (ready to use)
 	std::array<int, kCardCount> used_cards;		//used dev cards
-	bool dev_card_has_been_played = false;	//have we played dev card this turn?
+	bool dev_card_has_been_played = false;		//have we played dev card this turn?
 };
 
 class Player : private _Player {
@@ -18,29 +18,40 @@ private:
 		cities_used = 0;
 
 public:
-	Player(int _pID) : id(_pID) {};	
+	explicit Player(int _pID) : id(_pID) {};
+	//explicit Player(Player& p) : id(p.id) {};	
+
+	Player() = delete;
+	~Player() = default;
 
 	const int id;							//player id
 	
 	int GetResourceCount(resource res) const{ return (resources[res]); };
 
-	int GetActiveCard(devCard card) const { return (active_cards[card]); };
-	int GetCards(devCard card) const { return (cards[card]); };	//already bought, but not ready to use
+	int GetActiveCard(devCard card) const { return (active_cards[static_cast<int>(card)]); };	//cards are ready to use
+	int GetUsedCard(devCard card) const { return (used_cards[static_cast<int>(card)]); };		//used dev card
+	int GetCards(devCard card) const { return (cards[static_cast<int>(card)]); };				//already bought, but not ready to use (this turn)
+	
 	int GetTotalCardCount(devCard card) const;
 	int GetTotalCardsCount() const;
-	int GetUsedCard(devCard card) const { return (used_cards[card]); };
+	
 
 	int GetBuildingScore() const 
 		{ return (settlements_used * kSettelmentScore + cities_used * kCityScore); };
-	int GetCitiesLeft() const { return (kMaxCities - cities_used); };
 	int GetMaxRoadLength() const;
-	int GetRoadsLeft() const { return (kMaxRoads - roads_used); };
-	int GetSettelmentsLeft() const { return (kMaxSettelments - settlements_used); };
-
 	void SetMaxRoadLength(int max);
-	void AddCity(bool decSettelment = true);
+
+	int GetRoadsLeft() const { return (kMaxRoads - roads_used); };
 	void AddRoad();
+	void DeleteRoad();
+
+	int GetSettelmentsLeft() const { return (kMaxSettelments - settlements_used); };
 	void AddSettelment();
+	void DeleteSettelment();
+
+	int GetCitiesLeft() const { return (kMaxCities - cities_used); };	
+	void AddCity(bool decSettelment = true);
+	void DeleteCity();	
 
 	void ActivateDevCards();
 	void UseDevCard(devCard card);	

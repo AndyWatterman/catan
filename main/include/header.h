@@ -51,7 +51,7 @@ const std::string kFont = "Font\\RobotoSlab-Regular.ttf";
 enum class building_types { settelment, city, none };
 
 //карты развития
-enum devCard {
+enum class devCard {
 	knight,		//рыцарь
 	monopoly,	//монополия
 	roads,		//строительство 2-х дорог
@@ -136,7 +136,8 @@ namespace Sprites {
 		selGreenRoad,
 		selOrangeRoad,
 		selWhiteRoad,
-		selBrownRoad,		
+		selBrownRoad,
+		robot,
 		harbor_stone,
 		harbor_3_brick,
 		harbor_3_sheep,
@@ -228,6 +229,8 @@ namespace Sprites {
 			{176, 256, 102, 16, Resources::ID::all, Sprites::ID::selWhiteRoad },
 			{192, 256, 102, 16, Resources::ID::all, Sprites::ID::selBrownRoad },
 
+			{224, 256, 30, 26, Resources::ID::all, Sprites::ID::robot },
+
 			{0, 359, 547, 153, Resources::ID::all, Sprites::ID::harbor_stone },
 			{154, 359, 547, 153, Resources::ID::all, Sprites::ID::harbor_3_brick },
 			{308, 359, 547, 153, Resources::ID::all, Sprites::ID::harbor_3_sheep },
@@ -255,6 +258,7 @@ enum class BoardObjects : unsigned int {
 	button,
 	label,
 	rectangle,
+	icon,
 	abstract,
 	none
 };

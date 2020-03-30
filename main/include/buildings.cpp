@@ -12,15 +12,24 @@ Buildings::Buildings(GameState & parent) : pGameState(&parent)
 
 void Buildings::AddSettelement(int point, int id)
 {	
-	buildings.push_back(Building({ point, id, building_types::settelment }));
-	(*pGameState->players)[id].AddSettelment();	//Update settelement
-	(*pGameState->roads).UpdateRoadsLength();	//need to update roads, cuz it might be broken
+	auto& currentPlayer = (*pGameState->players)[id];
+	if (currentPlayer.GetSettelmentsLeft() > 0) {
+		buildings.push_back(Building({ point, id, building_types::settelment }));
+		currentPlayer.AddSettelment();	//Update settelement
+		(*pGameState->roads).UpdateRoadsLength();	//need to update roads, cuz it might be broken
+	}
 }
 
 void Buildings::DeleteSettelement(int point)
 {	
 	for (auto it = buildings.begin(); it != buildings.end(); ++it) {
 		if (it->point == point) {
+			if (it->type == building_types::settelment) {
+				(*pGameState->players)[it->id].DeleteSettelment();
+			}
+			else {
+				(*pGameState->players)[it->id].DeleteCity();
+			}
 			buildings.erase(it);
 			break;
 		}
@@ -116,9 +125,15 @@ void Buildings::LoadBuildings(const std::vector<Building>& _buildings)
 
 void Buildings::UpgradeBuilding(int point)
 {
-	Building &building = (*pGameState->buildings)[point];
-	building.type = building_types::city;
-	(*pGameState->players)[building.id].AddCity();
+	if (IsBuildingExists(point) >= 0) {
+		Building& building = (*pGameState->buildings)[point];
+		auto& currentPlayer = (*pGameState->players)[building.id];
+
+		if (currentPlayer.GetCitiesLeft() > 0) {
+			building.type = building_types::city;
+			currentPlayer.AddCity();
+		}
+	}
 }
 
 void Buildings::UpdateBuildingsScore()

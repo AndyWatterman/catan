@@ -11,26 +11,33 @@ Roads::Roads(GameState & parent) : pGameState(&parent)
 
 void Roads::AddRoad(int from, int to, int id)
 {
-	roads.push_back(Road({ from, to, id }));
-	(*pGameState->players)[id].AddRoad();
-	UpdateSpecificRoadLength(id);
+	auto& currentPlayer = (*pGameState->players)[id];
+	if (currentPlayer.GetRoadsLeft() > 0) {
+		roads.push_back(Road({ from, to, id }));	//add road to array
+		currentPlayer.AddRoad();					//say that we used 1 road
+		UpdateSpecificRoadLength(id);				//update player's road length
+	}
 }
 
 void Roads::AddRoad(const Road & road)
 {
-	roads.push_back(road);
-	(*pGameState->players)[road.id].AddRoad();	
-	UpdateSpecificRoadLength(road.id);
+	auto& currentPlayer = (*pGameState->players)[road.id];
+	if (currentPlayer.GetRoadsLeft() > 0) {
+		roads.push_back(road);						//add road to array
+		currentPlayer.AddRoad();	//say that we used 1 road
+		UpdateSpecificRoadLength(road.id);			//update player's road length
+	}
 }
 
 void Roads::DeleteRoad(int from, int to)
 {
 	for (auto it = roads.begin(); it != roads.end(); it++) {
 		if (((it->from == from) || (it->from == to)) && ((it->to == from) || (it->to == to))) {
-			int pId = it->id;
-			roads.erase(it);
-			//UpdateSpecificRoadLength(pId);
+
+			(*pGameState->players)[it->id].DeleteRoad();	//decrease used roads count
+			roads.erase(it);			
 			UpdateRoadsLength();
+
 			break;
 		}
 	}

@@ -30,7 +30,7 @@ void Board::Init()
 	addObject<BoardBorder>("BoardBorder6", 24, 581, 330);
 	
 	//button generate hex
-	addObject<Btn>("ButtonGenHex", 1830, 900, 65, 24, 0,
+	addObject<Btn>("ButtonGenHex", 1200, 900, 65, 24, 0,
 		sf::Color(89, 89, 89, 255), 2, sf::Color(255, 60, 0, 255),
 		sf::Color(255, 0, 0, 255), sf::Color(89, 89, 89, 255), sf::Color(255, 255, 255, 255),
 		sf::Color(213, 126, 3), sf::Color(89, 89, 89, 255), sf::Color(255, 255, 255, 255),
@@ -39,19 +39,63 @@ void Board::Init()
 
 	//PlayerContainer
 	addObject<PlayerContainer>("PlayerContainer", 1397+250, 3+644/2, kPlayerContainerWidth, kPlayerContainerHeight);
-	addObject<Label>("LabelLargestRoad", 1641, 14, 0, sf::Color(100, 228, 255, 255), "L. Road (0)", 16);
+	addObject<Label>("LabelLargestRoad", 1641, 14, 0, sf::Color(100, 228, 255, 255), "L. Road (0)", 18);
+	addObject<Label>("LabelLargestArmy", 1745, 14, 0, sf::Color(100, 228, 255, 255), "L. Army (0)", 18);	
+
+	addObject<Label>("AIName", 1450, 14, 0, sf::Color(255, 255, 255, 255), "AI #1", 18);
+	addObject<Rectangl>("RobotIcon", BoardObjects::icon, Sprites::ID::robot, 1397 + 25, 10 + 25, 26, 30, 0);
+
+	addObject<Rectangl>("ScoreSquare", BoardObjects::icon, sf::Color(255, 255, 255, 255), 2, sf::Color(255, 0, 0, 0), 1534+70, 10+30/2, 26, 26, 0);
+	addObject<Label>("LabelScore", 1534 + 62, 13, 0, sf::Color(255, 255, 255, 255), "7", 18);
+	addObject<Label>("LabelScoreScore", 1530, 14, 0, sf::Color(255, 255, 255, 255), "Score:", 18);
+
+	addObject<Label>("SoldRoadSetCities", 1450, 45, 0, sf::Color(255, 255, 255, 255), "Soldiers:  3    Roads:  4    Settelments: 2    Cities:  4", 18);	
+	addObject<Label>("ResDev", 1450, 70, 0, sf::Color(255, 255, 255, 255), "Total res.:  3    Dev. cards:  4", 18);	
 
 	if (catan->catan_ai->getPlayersCount() > 1) {
 		addObject<PlayerContainer>("PlayerContainer0", 1397 + 250, 3 + 644 + 98 / 2 + 3, kPlayerContainerWidth, 98);
-		addObject<Label>("LabelLargestRoad0", 1641, 14 + 3 + 644, 0, sf::Color(100, 228, 255, 255), "L. Road (0)", 16);
+		addObject<Label>("LabelLargestRoad0", 1641, 14 + 3 + 644, 0, sf::Color(100, 228, 255, 255), "L. Road (0)", 18);
+		addObject<Label>("LabelLargestArmy0", 1745, 14 + 3 + 644, 0, sf::Color(100, 228, 255, 255), "L. Army (0)", 18);
+
+		addObject<Rectangl>("RobotIcon0", BoardObjects::icon, Sprites::ID::robot, 1397 + 25, 10 + 30 / 2 + 3 + 644, 26, 30, 0);
+		addObject<Label>("AIName0", 1450, 14 + 3 + 644, 0, sf::Color(255, 255, 255, 255), "AI #2", 18);
+
+		addObject<Rectangl>("ScoreSquare0", BoardObjects::icon, sf::Color(255, 255, 255, 255), 2, sf::Color(255, 0, 0, 0), 1534 + 70, 10 + 30 / 2 + 3 + 644, 26, 26, 0);
+		addObject<Label>("LabelScore0", 1534 + 62, 13 + 3 + 644, 0, sf::Color(255, 255, 255, 255), "7", 18);
+		addObject<Label>("LabelScoreScore0", 1530, 14 + 3 + 644, 0, sf::Color(255, 255, 255, 255), "Score:", 18);
+
+		addObject<Label>("SoldRoadSetCities0", 1450, 45 + 3 + 644, 0, sf::Color(255, 255, 255, 255), "Soldiers:  3    Roads:  4    Settelments: 2    Cities:  4", 18);
+		addObject<Label>("ResDev0", 1450, 70 + 3 + 644, 0, sf::Color(255, 255, 255, 255), "Total res.:  3    Dev. cards:  4", 18);
 	}
 	if (catan->catan_ai->getPlayersCount() > 2) {
 		addObject<PlayerContainer>("PlayerContainer1", 1397 + 250, 3 + 644 + 98 / 2 + 3 + 98 + 3, kPlayerContainerWidth, 98);
-		addObject<Label>("LabelLargestRoad1", 1641, 14 + 3 + 644 + 3 + 98, 0, sf::Color(100, 228, 255, 255), "L. Road (0)", 16);
+		addObject<Label>("LabelLargestRoad1", 1641, 14 + 3 + 644 + 3 + 98, 0, sf::Color(100, 228, 255, 255), "L. Road (0)", 18);
+		addObject<Label>("LabelLargestArmy1", 1745, 14 + 3 + 644 + 3 + 98, 0, sf::Color(100, 228, 255, 255), "L. Army (0)", 18);
+
+		addObject<Rectangl>("RobotIcon1", BoardObjects::icon, Sprites::ID::robot, 1397 + 25, 10 + 30 / 2 + 3 + 644 + 3 + 98, 26, 30, 0);
+		addObject<Label>("AIName1", 1450, 14 + 3 + 644 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "AI #3", 18);
+
+		addObject<Rectangl>("ScoreSquare1", BoardObjects::icon, sf::Color(255, 255, 255, 255), 2, sf::Color(255, 0, 0, 0), 1534 + 70, 10 + 30 / 2 + 3 + 644 + 3 + 98, 26, 26, 0);
+		addObject<Label>("LabelScore1", 1534 + 62, 13 + 3 + 644 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "7", 18);
+		addObject<Label>("LabelScoreScore1", 1530, 14 + 3 + 644 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "Score:", 18);
+
+		addObject<Label>("SoldRoadSetCities1", 1450, 45 + 3 + 644 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "Soldiers:  3    Roads:  4    Settelments: 2    Cities:  4", 18);
+		addObject<Label>("ResDev1", 1450, 70 + 3 + 644 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "Total res.:  3    Dev. cards:  4", 18);
 	}
 	if (catan->catan_ai->getPlayersCount() > 3) {
 		addObject<PlayerContainer>("PlayerContainer2", 1397+250, 3+644+98/2+3+98+98+3+3, kPlayerContainerWidth, 98);
-		addObject<Label>("LabelLargestRoad2", 1641, 14 + 3 + 644 + 3 + 98 + 3 + 98, 0, sf::Color(100, 228, 255, 255), "L. Road (0)", 16);		
+		addObject<Label>("LabelLargestRoad2", 1641, 14 + 3 + 644 + 3 + 98 + 3 + 98, 0, sf::Color(100, 228, 255, 255), "L. Road (0)", 18);		
+		addObject<Label>("LabelLargestArmy2", 1745, 14 + 3 + 644 + 3 + 98 + 3 + 98, 0, sf::Color(100, 228, 255, 255), "L. Army (0)", 18);
+
+		addObject<Rectangl>("RobotIcon2", BoardObjects::icon, Sprites::ID::robot, 1397 + 25, 10 + 30 / 2 + 3 + 644 + 3 + 98 + 3 + 98, 26, 30, 0);
+		addObject<Label>("AIName2", 1450, 14 + 3 + 644 + 3 + 98 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "AI #4", 18);
+
+		addObject<Rectangl>("ScoreSquare2", BoardObjects::icon, sf::Color(255, 255, 255, 255), 2, sf::Color(255, 0, 0, 0), 1534 + 70, 10 + 30 / 2 + 3 + 644 + 3 + 98 + 3 + 98, 26, 26, 0);
+		addObject<Label>("LabelScore2", 1534 + 62, 13 + 3 + 644 + 3 + 98 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "7", 18);
+		addObject<Label>("LabelScoreScore2", 1530, 14 + 3 + 644 + 3 + 98 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "Score:", 18);
+
+		addObject<Label>("SoldRoadSetCities2", 1450, 45 + 3 + 644 + 3 + 98 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "Soldiers:  3    Roads:  4    Settelments: 2    Cities:  4", 18);
+		addObject<Label>("ResDev2", 1450, 70 + 3 + 644 + 3 + 98 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "Total res.:  3    Dev. cards:  4", 18);
 	}
 
 	//button next turn

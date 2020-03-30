@@ -3,7 +3,7 @@
 
 int Player::GetTotalCardCount(devCard card) const
 {	
-	return (cards[card] + active_cards[card] + used_cards[card]);
+	return (cards[static_cast<int>(card)] + active_cards[static_cast<int>(card)] + used_cards[static_cast<int>(card)]);
 }
 
 int Player::GetTotalCardsCount() const
@@ -32,14 +32,31 @@ void Player::AddCity(bool decSettelment)
 		settlements_used--;
 }
 
-void Player::AddRoad()
+void Player::DeleteCity()
 {
+	cities_used--;
+}
+
+//Only add 1 used road, no building
+void Player::AddRoad()
+{	
 	roads_used++;
 }
 
+void Player::DeleteRoad()
+{
+	roads_used--;
+}
+
+//Only add 1 used settelment, no building
 void Player::AddSettelment()
 {
 	settlements_used++;
+}
+
+void Player::DeleteSettelment()
+{
+	settlements_used--;
 }
 
 void Player::ActivateDevCards()
@@ -52,8 +69,8 @@ void Player::ActivateDevCards()
 
 void Player::UseDevCard(devCard card)
 {
-	active_cards[card]--;
-	used_cards[card]++;
+	active_cards[static_cast<int>(card)]--;
+	used_cards[static_cast<int>(card)]++;
 	dev_card_has_been_played = true;
 }
 
