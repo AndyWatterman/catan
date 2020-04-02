@@ -8,11 +8,11 @@ _Board _board = {
 		//описание гексов с ресурсами (0-18)
 		/*const vector<resource> resources*/
 		{
-			brick, weat, wood,
-			non, stone, brick, sheep,
-			stone, weat, sheep, wood, weat,
-			wood, wood, weat, sheep,
-			brick, sheep, stone
+			resource::brick, resource::weat, resource::wood,
+			resource::non, resource::stone, resource::brick, resource::sheep,
+			resource::stone, resource::weat, resource::sheep, resource::wood, resource::weat,
+			resource::wood, resource::wood, resource::weat, resource::sheep,
+			resource::brick, resource::sheep, resource::stone
 		},
 
 		//значение кубиков(2-12) для каждого гекса(0-18)
@@ -88,17 +88,17 @@ _Board _board = {
 		//порты для точек
 		//const vector<resource> harbors =
 		{
-			{ tin1 },{ brick },{ tin1 },	//0-2
-			{ tin1 },{ non },{ brick },{ tin1 },	//3-6		
-			{ non },{ non },{ non },{ non },	//7-10
-			{ tin1 },{ non },{ non },{ non },{ sheep },	//11-15
-			{ tin1 },{ non },{ non },{ non },{ sheep },	//16-20
-			{ non },{ non },{ non },{ non },{ non },{ non },	//21-26
-			{ non },{ non },{ non },{ non },{ non },{ non },	//27-32
-			{ non },{ non },{ non },{ non },{ stone },	//33-37
-			{ wood },{ non },{ non },{ non },{ stone },	//38-42
-			{ wood },{ non },{ non },{ non },	//43-46
-			{ non },{ weat },{ non },{ tin1 },	//47-50
-			{ non },{ weat },{ tin1 }	//51-53
+			{resource::tin1 },{ resource::brick },{ resource::tin1 },	//0-2
+			{ resource::tin1 },{ resource::non },{ resource::brick },{ resource::tin1 },	//3-6		
+			{ resource::non },{ resource::non },{ resource::non },{ resource::non },	//7-10
+			{ resource::tin1 },{ resource::non },{ resource::non },{ resource::non },{ resource::sheep },	//11-15
+			{ resource::tin1 },{ resource::non },{ resource::non },{ resource::non },{ resource::sheep },	//16-20
+			{ resource::non },{ resource::non },{ resource::non },{ resource::non },{ resource::non },{ resource::non },	//21-26
+			{ resource::non },{ resource::non },{ resource::non },{ resource::non },{ resource::non },{ resource::non },	//27-32
+			{ resource::non },{ resource::non },{ resource::non },{ resource::non },{ resource::stone },	//33-37
+			{ resource::wood },{ resource::non },{ resource::non },{ resource::non },{ resource::stone },	//38-42
+			{ resource::wood },{ resource::non },{ resource::non },{ resource::non },	//43-46
+			{ resource::non },{ resource::weat },{ resource::non },{ resource::tin1 },	//47-50
+			{ resource::non },{ resource::weat },{ resource::tin1 }	//51-53
 		}
 };

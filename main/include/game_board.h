@@ -32,5 +32,5 @@ public:
 	void genNewHexes();
 	void setHexResource(unsigned int hex, resource res);	//set specific resourse for hex
 	void setHarborResource(unsigned int point, resource res);	//set specific resourse for hex
-	void setBorderType(unsigned int border_pos, unsigned int border_type);
+	void setBorderType(int border_pos, resource border_type);
 };

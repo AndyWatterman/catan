@@ -75,9 +75,9 @@ void Object::OnMouseMove()
 {
 }
 
-bool Object::OnMouseOver(float x, float y)
+Object* Object::OnMouseOver(float x, float y)
 {
-	return false;
+	return nullptr;
 }
 
 void Object::OnMouseUp(sf::Mouse::Button button)
@@ -208,18 +208,22 @@ void BoardHex::setDice(int _dice)
 	}
 }
 
-Btn::Btn(const std::string& name, float x, float y, int width, int height, float angle,
-	const sf::Color& OutlineColor, float OutlineThickness, const sf::Color& FillColor,
-	const sf::Color& HoverFillColor, const sf::Color& HoverOutlineColor, const sf::Color& HoverTextColor,
-	const sf::Color& PressedFillColor, const sf::Color& PressedOutlineColor, const sf::Color& PressedTextColor,
-	const sf::Color& textColor, const std::string& text, int textSize, objButtonEvents event) :
-	Rectangl(name, BoardObjects::button, OutlineColor, OutlineThickness, FillColor,x, y, width, height, angle),
-
+/*template<typename ...Args>
+Btn::Btn(const std::string& name, float x, float y, int width, int height, float angle, 
+	const sf::Color& OutlineColor, float OutlineThickness, const sf::Color& FillColor, 
+	const sf::Color& HoverFillColor, const sf::Color& HoverOutlineColor, const sf::Color& HoverTextColor, 
+	const sf::Color& PressedFillColor, const sf::Color& PressedOutlineColor, const sf::Color& PressedTextColor, 
+	const sf::Color& textColor, const std::string& text, int textSize, 
+	objButtonEvents event, Args&& ...args)
+	
+	: Rectangl(name, BoardObjects::button, OutlineColor, OutlineThickness, FillColor,x, y, width, height, angle),
 	OutlineColor(OutlineColor), FillColor(FillColor), textColor(textColor), 
 	HoverFillColor(HoverFillColor), HoverOutlineColor(HoverOutlineColor), HoverTextColor(HoverTextColor),
 	PressedFillColor(PressedFillColor), PressedOutlineColor(PressedOutlineColor), PressedTextColor(PressedTextColor),
 	text(text),	event(event)
-{	
+{		
+	//std::tuple<Args...> tuple_ = std::tuple<Args...>(args...);
+
 	caption.setFont(catan->getFont());
 	caption.setString(text);
 	caption.setCharacterSize(textSize);
@@ -228,7 +232,7 @@ Btn::Btn(const std::string& name, float x, float y, int width, int height, float
 	const sf::FloatRect bounds(caption.getLocalBounds());
 	caption.setOrigin(bounds.width / 2, bounds.height / 2 + bounds.top);
 	caption.setPosition(x, y);
-}
+}*/
 
 void Btn::setBtnState(btnStates state)
 {
@@ -252,11 +256,10 @@ void Btn::setBtnState(btnStates state)
 	}
 }
 
-
 void Btn::OnMouseDown(int x, int y, sf::Mouse::Button button)
 {
 	isPressed = true;
-	setBtnState(btnStates::pressed);	
+	setBtnState(btnStates::pressed);
 }
 
 void Btn::OnMouseLeave()
@@ -267,7 +270,12 @@ void Btn::OnMouseLeave()
 
 void Btn::OnMouseMove()
 {
-	setBtnState(btnStates::hover);
+	if (isPressed) {
+		setBtnState(btnStates::pressed);
+	}
+	else {
+		setBtnState(btnStates::hover);
+	}
 }
 
 void Btn::OnMouseUp(sf::Mouse::Button button)
@@ -275,7 +283,7 @@ void Btn::OnMouseUp(sf::Mouse::Button button)
 	if (isPressed) {
 		isPressed = false;		
 		setBtnState(btnStates::hover);
-		processBtnEvent(event);
+		processBtnEvent(event, params);
 	}
 }
 
@@ -285,18 +293,40 @@ void Btn::OnDraw()
 	catan->GetWindow().draw(caption);
 }
 
-void Btn::processBtnEvent(objButtonEvents event)
+void Btn::processBtnEvent(objButtonEvents event, const std::vector<std::any>& params)
 {
 	switch (event) {
-		case objButtonEvents::genHexes:
+		case objButtonEvents::genHexes: {
 			std::cout << "genHexesPressed" << std::endl;
 			catan->catan_ai->genNewHexes();			
 			break;
+			}
 
-        case objButtonEvents::nextTurn:
+		case objButtonEvents::nextTurn: {
 			std::cout << "nextTurnPressed" << std::endl;
 			catan->catan_ai->nextTurn();
+
+			//clear trade controls
+			for (auto i = 0; i < kResCount; i++)
+				static_cast<ControlTradeResource*>(catan->board->GetObjectByName("TradeControl" + std::to_string(i)))->Reset();
+
 			break;
+		}
+
+		case objButtonEvents::addResource: {
+			std::cout << "addResourcePressed" << std::endl;
+			auto cTR = std::any_cast<ControlTradeResource*>(params[0]);
+			(*cTR)++;
+
+			break;
+		}
+
+		case objButtonEvents::clearTrade: {
+			for (auto i = 0; i < kResCount; i++)
+				static_cast<ControlTradeResource*>(catan->board->GetObjectByName("TradeControl" + std::to_string(i)))->Reset();
+
+			break;
+		}
     }
 }
 
@@ -439,7 +469,7 @@ void Rectangl::setSpriteID(Sprites::ID sprite)
 
 PlayerContainer::PlayerContainer(const std::string& name, float x, float y, int width, int height)
 	:Rectangl(name, BoardObjects::rectangle, sf::Color(85, 85, 85, 255), 3,
-		kPlayerColors[catan->catan_ai->getCurrentPlayer()], x, y, width, height, 0)
+		kPlayerColors[catan->catan_ai->getCurrentPlayerId()], x, y, width, height, 0)
 {
 	
 }
@@ -454,7 +484,7 @@ void Rectangl::UseTextureForDrop(bool enable)
 	useTextureForDragNDrop = enable;
 }
 
-bool Rectangl::OnMouseOver(float x, float y)
+Object* Rectangl::OnMouseOver(float x, float y)
 {
 	if (!IsHidden()) {
 		if (getGlobalBounds().contains(x, y)) {
@@ -466,7 +496,7 @@ bool Rectangl::OnMouseOver(float x, float y)
 				&& (vec.y < lBounds.height) && (vec.y >= 0)) {		
 
 				if (!getTexture() || !IsTextureUsedForDrop()) {	//no texture, only shape					
-					return (true);					
+					return (this);			
 				}
 				else {
 					sf::IntRect rect = getTextureRect();
@@ -474,14 +504,14 @@ bool Rectangl::OnMouseOver(float x, float y)
 					sf::Color pColor = image.getPixel(static_cast<unsigned int>(vec.x + rect.left),
 						static_cast<unsigned int>(vec.y + rect.top));
 					if (pColor.a) {						
-						return (true);
+						return (this);
 					}
 				}
 			}			
 		}
 	}
 	
-	return (false);
+	return (nullptr);
 }
 
 void Rectangl::OnDraw()
@@ -541,7 +571,7 @@ void BoardBuilding::Update()
 	else {
 		sp = Sprites::ID::redCity;
 	}
-	setSpriteID(static_cast<Sprites::ID>(static_cast<unsigned int>(sp) + catan->catan_ai->getCurrentPlayer()));
+	setSpriteID(static_cast<Sprites::ID>(static_cast<unsigned int>(sp) + catan->catan_ai->getCurrentPlayerId()));
 }
 
 unsigned int buildingHooks::building_hook_id = 0;
@@ -579,7 +609,7 @@ bool buildingHooks::OnDragDrop(Object* obj)
 
 	BoardObjects objType = obj->getObjectType();
 	int oldPoint = -1;
-	int owner = catan->catan_ai->getCurrentPlayer();
+	int owner = catan->catan_ai->getCurrentPlayerId();
 	building_types bType = building_types::none;
 
 	if (objType == BoardObjects::building) {
@@ -601,7 +631,7 @@ bool buildingHooks::OnDragDrop(Object* obj)
 
 	Building* building = catan->catan_ai->game_state->buildings->getBuilding(point);
 
-	if (((bType == building_types::city) && (building != nullptr) && (building->type == building_types::settelment) && (building->id == catan->catan_ai->getCurrentPlayer()))
+	if (((bType == building_types::city) && (building != nullptr) && (building->type == building_types::settelment) && (building->id == catan->catan_ai->getCurrentPlayerId()))
 		|| ((bType == building_types::settelment) && (building == nullptr) && (!catan->catan_ai->game_state->buildings->IsThereBuildingsAround(point)) && (catan->catan_ai->game_state->roads->IsRoadPointExists(point)))
 		|| (objType == BoardObjects::buildingHooks)
 		|| ((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) || (sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))) {
@@ -643,7 +673,7 @@ void buildingHooks::OnDragOver(Object* obj)
 	
 	Building* building = catan->catan_ai->game_state->buildings->getBuilding(point);
 
-	if (((bType == building_types::city) && (building != nullptr) && (building->type == building_types::settelment) && (building->id == catan->catan_ai->getCurrentPlayer()))
+	if (((bType == building_types::city) && (building != nullptr) && (building->type == building_types::settelment) && (building->id == catan->catan_ai->getCurrentPlayerId()))
 		|| ((bType == building_types::settelment) && (building == nullptr) && (!catan->catan_ai->game_state->buildings->IsThereBuildingsAround(point)) && (catan->catan_ai->game_state->roads->IsRoadPointExists(point)))
 		|| (objType == BoardObjects::buildingHooks)
 		|| ((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) || (sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))) {
@@ -722,7 +752,7 @@ bool BoardRoad::OnEndDrag(bool accepted)
 
 void BoardRoad::Update()
 {
-	setSpriteID(static_cast<Sprites::ID>(static_cast<int>(Sprites::ID::redRoad) + catan->catan_ai->getCurrentPlayer()));
+	setSpriteID(static_cast<Sprites::ID>(static_cast<int>(Sprites::ID::redRoad) + catan->catan_ai->getCurrentPlayerId()));
 }
 
 roadHooks::roadHooks(const std::string& name, float x, float y, double angle)
@@ -763,7 +793,7 @@ bool roadHooks::OnDragDrop(Object* obj)
 	switch (objType)
 	{
 	case BoardObjects::road: {
-		newRoadPlayerId = catan->catan_ai->getCurrentPlayer();
+		newRoadPlayerId = catan->catan_ai->getCurrentPlayerId();
 		break;
 	}
 
@@ -802,7 +832,7 @@ void roadHooks::OnDragOver(Object* obj)
 	switch (objType)
 	{
 	case BoardObjects::road: {
-		newRoadPlayerId = catan->catan_ai->getCurrentPlayer();
+		newRoadPlayerId = catan->catan_ai->getCurrentPlayerId();
 		break;
 	}
 
@@ -884,7 +914,7 @@ void UpdateAbstractClass::Update()
 		return;
 
 	auto players = catan->catan_ai->game_state->players.get();
-	auto currId = catan->catan_ai->getCurrentPlayer();
+	auto currId = catan->catan_ai->getCurrentPlayerId();
 
 	////////////////////////////////////////////////////////////
 	/// Update color of player containers
@@ -957,4 +987,230 @@ void UpdateAbstractClass::Update()
 			
 		}
 	}
+
+	////////////////////////////////////////////////////////////
+	/// Update total resources, development cards count
+	////////////////////////////////////////////////////////////
+
+	{
+		Label* pc1;
+
+		for (auto i = 0, currContId = 0; i < catan->catan_ai->getPlayersCount(); i++) {
+
+			if (i != currId) {
+				pc1 = dynamic_cast<Label*>(catan->board->GetObjectByName("ResDev" + std::to_string(currContId)));
+				currContId++;
+			}
+			else {
+				pc1 = dynamic_cast<Label*>(catan->board->GetObjectByName("ResDev"));
+			}
+
+			pc1->setString(
+				"Total res.:  " + std::to_string((*players)[i].GetTotalResourceCount())
+				+ "    Dev. cards:  " + std::to_string((*players)[i].GetAllClosedDevCardsCount())
+			);
+
+		}
+	}
+
+	////////////////////////////////////////////////////////////
+	/// Update players' score
+	////////////////////////////////////////////////////////////
+
+	{
+		Label* pc1;
+
+		for (auto i = 0, currContId = 0; i < catan->catan_ai->getPlayersCount(); i++) {
+
+			if (i != currId) {
+				pc1 = dynamic_cast<Label*>(catan->board->GetObjectByName("LabelScore" + std::to_string(currContId)));
+				currContId++;
+			}
+			else {
+				pc1 = dynamic_cast<Label*>(catan->board->GetObjectByName("LabelScore"));
+			}
+
+			pc1->setString(std::to_string((*players).GetPlayerScore(i, true)));
+
+		}
+	}
+
+	////////////////////////////////////////////////////////////
+	/// Update resource count on hands
+	////////////////////////////////////////////////////////////
+
+	auto updResCount = [&](const std::string & str, resource _res, unsigned int pos) {
+		Label* pc1{};
+		pc1 = dynamic_cast<Label*>(catan->board->GetObjectByName(str));
+		int res = (*players)[currId].GetResourceCount(_res);
+		pc1->setString(std::to_string(res));
+		if (res < 10) {
+			pc1->setPosition(1425 + 74 * pos, 110);
+			pc1->setCharacterSize(60);
+		}
+		else {
+			pc1->setPosition(1415 + 74 * pos, 118);
+			pc1->setCharacterSize(48);
+		}
+	};
+
+	updResCount("WoodRes", resource::wood, 0);
+	updResCount("BrickRes", resource::brick, 1);
+	updResCount("SheepRes", resource::sheep, 2);
+	updResCount("WheatRes", resource::weat, 3);
+	updResCount("StoneRes", resource::stone, 4);
+
+	////////////////////////////////////////////////////////////
+	/// Update trade checkboxes colors
+	////////////////////////////////////////////////////////////
+
+	{
+		CheckBox* pc1;
+
+		for (auto i = 0, currContId = 0; i < catan->catan_ai->getPlayersCount(); i++) {
+
+			if (i != currId) {
+				pc1 = dynamic_cast<CheckBox*>(catan->board->GetObjectByName("TradeCheckBox" + std::to_string(currContId)));
+				pc1->setFillColor(kPlayerColors[i]);
+				currContId++;
+			}
+		}
+	}
+
+	////////////////////////////////////////////////////////////
+	/// Trade icons
+	////////////////////////////////////////////////////////////
+
+
+}
+
+CheckBox::CheckBox(const std::string& name,sf::Color OutlineColor, sf::Color FillColor, float x, float y)
+	: Rectangl(name, BoardObjects::rectangle, OutlineColor, 2, FillColor, x, y, 27, 27, 0)
+{
+	checkSprite.setOrigin(checkSprite.getGlobalBounds().width/2, checkSprite.getGlobalBounds().width/2);
+	auto bounds = getGlobalBounds();
+	checkSprite.setPosition(bounds.left + getSize().x / 2 + 2, bounds.top + getSize().y / 2 + 5);
+}
+
+void CheckBox::setCheckState(bool state) const
+{
+	isChecked = state;
+}
+
+void CheckBox::OnMouseDown(int x, int y, sf::Mouse::Button button)
+{
+	isPressed = true;
+}
+
+void CheckBox::OnMouseLeave()
+{
+	isPressed = false;
+}
+
+void CheckBox::OnMouseUp(sf::Mouse::Button button)
+{
+	if (isPressed) {
+		isChecked = !isChecked;
+		std::cout << isChecked << std::endl;
+	}		
+}
+
+void CheckBox::OnDraw()
+{
+	catan->GetWindow().draw(*this);
+	if (isChecked)
+		catan->GetWindow().draw(checkSprite);
+}
+
+void ControlTradeResource::Reset()
+{
+	resourceCount = 0;	
+
+	setOutlineColor(sf::Color(255, 255, 255, 0));
+	selectedTrade = 0;
+	lFromTo.Hide();
+}
+
+void ControlTradeResource::OnMouseDown(int x, int y, sf::Mouse::Button button)
+{
+	isSelected = true;
+}
+
+void ControlTradeResource::OnMouseLeave()
+{
+	isSelected = false;
+}
+
+void ControlTradeResource::OnMouseUp(sf::Mouse::Button button)
+{
+	if (isSelected) {
+		switch (selectedTrade)
+		{
+		case 0:
+			setOutlineColor(sf::Color(255, 255, 255, 255));
+			selectedTrade++;
+			lFromTo.setString("FROM");
+			lFromTo.Show();
+			break;
+
+		case 1:
+			setOutlineColor(sf::Color(228, 0, 255, 255));
+			selectedTrade++;
+			lFromTo.setString("   TO");
+			break;
+
+		default:
+			setOutlineColor(sf::Color(255, 255, 255, 0));
+			selectedTrade = 0;		
+			lFromTo.Hide();
+			break;
+		}
+
+		isSelected = false;
+	}
+}
+
+Object* ControlTradeResource::OnMouseOver(float x, float y)
+{
+	auto result = Rectangl::OnMouseOver(x, y);
+	if (!result) {
+		result = addButton.OnMouseOver(x, y);
+	}	
+	return result;
+}
+
+ControlTradeResource::ControlTradeResource(const std::string& name, Sprites::ID spriteId, resource resType, float x, float y)
+	: Rectangl(name, BoardObjects::icon, spriteId, x, y, 41, 62, 0), 
+	lFromTo(name, x-14, y+35, 0, sf::Color(255, 255, 255, 255), "FROM", 11),
+	lResourceCount(name, x-17, y-35, 0, sf::Color(255, 255, 255, 255), "0", 33),
+	addButton("BtnAdd", x+1, 368, 25, 25, 0,
+		sf::Color(255, 255, 255, 255), 2, sf::Color(0, 0, 0, 0),
+		sf::Color(0, 0, 0, 0), sf::Color(255, 255, 255, 255), sf::Color(255, 255, 255, 255),
+		sf::Color(28, 148, 0), sf::Color(255, 255, 255, 255), sf::Color(255, 255, 255, 255),
+		sf::Color(255, 255, 255, 255), "+", 18,
+		objButtonEvents::addResource, this),
+	tradeResource(resType)
+{		
+	lFromTo.Hide();
+	setOutlineThickness(3);
+	setOutlineColor(sf::Color(255, 255, 255, 0));
+}
+
+void ControlTradeResource::OnDraw()
+{
+	catan->GetWindow().draw(*this);
+	lResourceCount.setString(std::to_string(resourceCount));
+	catan->GetWindow().draw(lResourceCount);
+	addButton.OnDraw();
+	if (!lFromTo.IsHidden())
+		catan->GetWindow().draw(lFromTo);
+}
+
+ControlTradeResource ControlTradeResource::operator++(int)
+{
+	Player* p = catan->catan_ai->getCurrentPlayer();
+ 	if (p->GetResourceCount(tradeResource) > resourceCount) {
+		resourceCount++;
+	}	
+	return *this;
 }

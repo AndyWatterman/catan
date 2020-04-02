@@ -33,7 +33,8 @@ public:
 	static std::unique_ptr<Drag> drag;
 
 	template<typename T1, typename ...Types>
-		void addObject(const std::string& name, Types&& ...args);
+	//template<template <typename ...Types> typename T1, typename ...Types>
+		Object* addObject(const std::string& name, Types&& ...args);
 
 	Object* GetObject(int x, int y);
 	Object* GetObjectByName(const std::string& name);

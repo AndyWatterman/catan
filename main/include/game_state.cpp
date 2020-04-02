@@ -13,7 +13,7 @@ GameState::GameState(CatanAi & parent): parent(parent)
 	players = std::unique_ptr<Players>(new Players(this));
 }
 
-int GameState::GetCurrentPlayer() const
+int GameState::GetCurrentPlayerId() const
 {
 	return static_cast<int>(current_pID);
 }

@@ -44,7 +44,6 @@ const int kCityScore = 2;
 const int kPlayerContainerWidth = 500;
 const int kPlayerContainerHeight = 644;
 
-//const std::string kFont = "C:/Windows/Fonts/RobotoSlab-Regular.ttf";
 const std::string kFont = "Font\\RobotoSlab-Regular.ttf";
 
 //поселение/город
@@ -146,6 +145,21 @@ namespace Sprites {
 		harbor_wood,
 		btnGenHexesUp,
 		btnGenHexesDown,
+		stoneCard,
+		brickCard,
+		sheepCard,
+		wheatCard,
+		woodCard,
+		oneScoreTownHallCard,
+		oneScoreMarketCard,
+		oneScoreUniversityCard,
+		oneScoreChurchCard,
+		oneScoreLibraryCard,
+		roadBuildingCard,
+		monopolyCard,
+		inventionCard,
+		knightCard,
+		check,
 		background,
 		none
 	};
@@ -230,6 +244,7 @@ namespace Sprites {
 			{192, 256, 102, 16, Resources::ID::all, Sprites::ID::selBrownRoad },
 
 			{224, 256, 30, 26, Resources::ID::all, Sprites::ID::robot },
+			{224, 286, 12, 18, Resources::ID::all, Sprites::ID::check },
 
 			{0, 359, 547, 153, Resources::ID::all, Sprites::ID::harbor_stone },
 			{154, 359, 547, 153, Resources::ID::all, Sprites::ID::harbor_3_brick },
@@ -237,9 +252,26 @@ namespace Sprites {
 			{462, 359, 547, 153, Resources::ID::all, Sprites::ID::harbor_3 },
 			{616, 359, 547, 153, Resources::ID::all, Sprites::ID::harbor_3_weat },
 			{770, 359, 547, 153, Resources::ID::all, Sprites::ID::harbor_wood },
+
 			{1392, 0, 27, 96, Resources::ID::all, Sprites::ID::btnGenHexesUp},
 			{1392, 27, 27, 96, Resources::ID::all, Sprites::ID::btnGenHexesDown},
-			{0, 0, 1080, 1920, Resources::ID::background, Sprites::ID::background }
+			{0, 0, 1080, 1920, Resources::ID::background, Sprites::ID::background },
+
+			{924, 358, 91, 59, Resources::ID::all, Sprites::ID::stoneCard},
+			{983, 358, 91, 59, Resources::ID::all, Sprites::ID::brickCard},
+			{1042, 358, 91, 59, Resources::ID::all, Sprites::ID::sheepCard},
+			{1101, 358, 91, 59, Resources::ID::all, Sprites::ID::wheatCard},
+			{1160, 358, 91, 59, Resources::ID::all, Sprites::ID::woodCard},
+
+			{1219, 358, 108, 71, Resources::ID::all, Sprites::ID::oneScoreTownHallCard},
+			{1290, 358, 108, 71, Resources::ID::all, Sprites::ID::oneScoreMarketCard},
+			{1361, 358, 108, 71, Resources::ID::all, Sprites::ID::oneScoreUniversityCard},
+			{1432, 358, 108, 71, Resources::ID::all, Sprites::ID::oneScoreChurchCard},
+			{1503, 358, 108, 71, Resources::ID::all, Sprites::ID::oneScoreLibraryCard},
+			{1574, 358, 108, 71, Resources::ID::all, Sprites::ID::roadBuildingCard},
+			{1645, 358, 108, 71, Resources::ID::all, Sprites::ID::monopolyCard},
+			{1716, 358, 108, 71, Resources::ID::all, Sprites::ID::inventionCard},
+			{1787, 358, 108, 71, Resources::ID::all, Sprites::ID::knightCard}
 		} 
 	};
 }
@@ -265,7 +297,7 @@ enum class BoardObjects : unsigned int {
 
 
 enum class btnStates: unsigned int {normal = 0, hover, pressed};
-enum class objButtonEvents: unsigned int {genHexes = 0, nextTurn, nothing};
+enum class objButtonEvents: unsigned int {genHexes = 0, nextTurn, addResource, nothing, clearTrade};
 
 //typedef void(*pSetPosition)(const sf::Vector2f& position);
 //typedef const sf::Vector2f& (*pGetPosition)();
@@ -277,7 +309,7 @@ typedef std::array<int, kMaxConnections> node;
 typedef std::array<int, kHex_to_points> hex_point;
 
 //ресурсы и порты в игре, где tin1 - порт 3:1, non - отсутствие ресурса (для гексов без ресурса)
-enum resource { stone, brick, sheep, weat, wood, non, tin1 };
+enum class resource { wood, brick, sheep, weat, stone, non, tin1 };
 
 //standart dices for 4ppl board
 const int kStandartDiceSequence = 18;
@@ -313,18 +345,24 @@ const std::array<int, 30> harborPoints =
 		43, 38, 33, 47, 51	//5
 	} };
 
-const std::array<int, 30> harborResources =
+const std::array<resource, 30> harborResources =
 { {
-	stone, stone, non, non, non,	//harbor_stone
-	non, brick, brick, tin1, tin1,	//harbor_3_brick
-	non, sheep, sheep, tin1, tin1,	//harbor_3_sheep
-	tin1, tin1, non, non, non,		//harbor_3	
-	non, weat, weat, tin1, tin1,	//harbor_3_weat
-	wood, wood, non, non, non		//harbor_wood
+	resource::stone, resource::stone, resource::non, resource::non, resource::non,	//harbor_stone
+	resource::non, resource::brick, resource::brick, resource::tin1, resource::tin1,	//harbor_3_brick
+	resource::non, resource::sheep, resource::sheep, resource::tin1, resource::tin1,	//harbor_3_sheep
+	resource::tin1, resource::tin1, resource::non, resource::non, resource::non,		//harbor_3	
+	resource::non, resource::weat, resource::weat, resource::tin1, resource::tin1,	//harbor_3_weat
+	resource::wood, resource::wood, resource::non, resource::non, resource::non		//harbor_wood
 } };
 
 //hexes for shuffle
-const std::vector<resource> hexForShuffling = { wood, wood, wood, wood, brick, brick, brick, sheep, sheep, sheep, sheep, weat, weat, weat, weat, stone, stone, stone, non };
+const std::vector<resource> hexForShuffling = {
+	resource::wood, resource::wood, resource::wood, resource::wood, 
+	resource::brick, resource::brick, resource::brick, 
+	resource::sheep, resource::sheep, resource::sheep, resource::sheep, 
+	resource::weat, resource::weat, resource::weat, resource::weat, 
+	resource::stone, resource::stone, resource::stone, 
+	resource::non };
 
 class CatanGUI;
 class Board;

@@ -35,7 +35,7 @@ void Board::Init()
 		sf::Color(255, 0, 0, 255), sf::Color(89, 89, 89, 255), sf::Color(255, 255, 255, 255),
 		sf::Color(213, 126, 3), sf::Color(89, 89, 89, 255), sf::Color(255, 255, 255, 255),
 		sf::Color(255, 255, 255, 255), "Generate", 11,
-		objButtonEvents::genHexes);		
+		objButtonEvents::genHexes);	
 
 	//PlayerContainer
 	addObject<PlayerContainer>("PlayerContainer", 1397+250, 3+644/2, kPlayerContainerWidth, kPlayerContainerHeight);
@@ -43,14 +43,78 @@ void Board::Init()
 	addObject<Label>("LabelLargestArmy", 1745, 14, 0, sf::Color(100, 228, 255, 255), "L. Army (0)", 18);	
 
 	addObject<Label>("AIName", 1450, 14, 0, sf::Color(255, 255, 255, 255), "AI #1", 18);
-	addObject<Rectangl>("RobotIcon", BoardObjects::icon, Sprites::ID::robot, 1397 + 25, 10 + 25, 26, 30, 0);
+	addObject<Rectangl>("RobotIcon", BoardObjects::icon, Sprites::ID::robot, 1397 + 25, 25, 26, 30, 0);
 
 	addObject<Rectangl>("ScoreSquare", BoardObjects::icon, sf::Color(255, 255, 255, 255), 2, sf::Color(255, 0, 0, 0), 1534+70, 10+30/2, 26, 26, 0);
 	addObject<Label>("LabelScore", 1534 + 62, 13, 0, sf::Color(255, 255, 255, 255), "7", 18);
 	addObject<Label>("LabelScoreScore", 1530, 14, 0, sf::Color(255, 255, 255, 255), "Score:", 18);
 
-	addObject<Label>("SoldRoadSetCities", 1450, 45, 0, sf::Color(255, 255, 255, 255), "Soldiers:  3    Roads:  4    Settelments: 2    Cities:  4", 18);	
-	addObject<Label>("ResDev", 1450, 70, 0, sf::Color(255, 255, 255, 255), "Total res.:  3    Dev. cards:  4", 18);	
+	addObject<Label>("SoldRoadSetCities", 1410, 45, 0, sf::Color(255, 255, 255, 255), "Soldiers:  3    Roads:  4    Settelments: 2    Cities:  4", 18);	
+	addObject<Label>("ResDev", 1410, 70, 0, sf::Color(255, 255, 255, 255), "Total res.:  3    Dev. cards:  4", 18);
+
+	////////////////////////////////////////////////////////////
+	/// Trade section
+	////////////////////////////////////////////////////////////
+
+	//Resources icon
+	addObject<Rectangl>("WoodIcon", BoardObjects::icon, Sprites::ID::woodCard, 1440, 150, 59, 91, 0);
+	addObject<Rectangl>("BrickIcon", BoardObjects::icon, Sprites::ID::brickCard, 1514, 150, 59, 91, 0);
+	addObject<Rectangl>("SheepIcon", BoardObjects::icon, Sprites::ID::sheepCard, 1514 + 59 + 15, 150, 59, 91, 0);
+	addObject<Rectangl>("WheatIcon", BoardObjects::icon, Sprites::ID::wheatCard, 1514 + 59 + 15 + 59 + 15, 150, 59, 91, 0);
+	addObject<Rectangl>("StoneIcon", BoardObjects::icon, Sprites::ID::stoneCard, 1514 + 59 + 15 + 59 + 15 + 59 + 15, 150, 59, 91, 0);
+
+	//Resources label
+	addObject<Label>("WoodRes", 1415, 118, 0, sf::Color(255, 255, 255, 255), "25", 48);
+	addObject<Label>("BrickRes", 1425 + 74, 110, 0, sf::Color(255, 255, 255, 255), "6", 60);
+	addObject<Label>("SheepRes", 1425+ 74 + 74, 110, 0, sf::Color(255, 255, 255, 255), "5", 60);
+	addObject<Label>("WheatRes", 1425+ 74 + 74 + 74, 110, 0, sf::Color(255, 255, 255, 255), "4", 60);
+	addObject<Label>("StoneRes", 1425+ 74 + 74 + 74 + 74, 110, 0, sf::Color(255, 255, 255, 255), "3", 60);
+
+	//Trade border
+	addObject<Rectangl>("TradeBorder", BoardObjects::rectangle, sf::Color(255, 255, 255, 255), 2, sf::Color(255, 255, 255, 0), 1647, 323, 467, 233, 0);
+
+	//Select
+	addObject<Label>("SelPlayersToTrade", 1420, 220, 0, sf::Color(255, 255, 255, 255), "Select players to trade:", 14);
+	addObject<Label>("SelResToTrade", 1420, 220+28, 0, sf::Color(255, 255, 255, 255), "Select resources to trade:", 14);
+
+	//Trade to whom checkboxes
+	addObject<CheckBox>("TradeCheckBox0", sf::Color(255, 255, 255, 255), sf::Color(205, 131, 52, 255), 1618, 228);
+	addObject<CheckBox>("TradeCheckBox1", sf::Color(255, 255, 255, 255), sf::Color(93, 206, 10, 255), 1618+32+5, 228);
+	addObject<CheckBox>("TradeCheckBox2", sf::Color(255, 255, 255, 255), sf::Color(69, 122, 255, 255), 1618+32+32+10, 228);
+	
+	//Trade resource icons
+	addObject<ControlTradeResource>("TradeControl0", Sprites::ID::woodCard, resource::wood, 1443, 303);		//wood
+	addObject<ControlTradeResource>("TradeControl1", Sprites::ID::brickCard, resource::brick, 1443 + 41 + 11, 303);		//brick
+	addObject<ControlTradeResource>("TradeControl2", Sprites::ID::sheepCard, resource::sheep, 1443 + 41 + 11 + 41 + 11, 303);	//sheep
+	addObject<ControlTradeResource>("TradeControl3", Sprites::ID::wheatCard, resource::weat, 1443 + 41 + 11 + 41 + 11 + 41 + 11, 303);		//wheat
+	addObject<ControlTradeResource>("TradeControl4", Sprites::ID::stoneCard, resource::stone, 1443 + 41 + 11 + 41 + 11 + 41 + 11 + 41 + 11, 303);		//stone
+
+	addObject<Label>("SelResToTrade", 1420, 392, 0, sf::Color(255, 255, 255, 160), "Hint: first click on res. - select for trading, ", 13);
+	addObject<Label>("SelResToTrade", 1420, 390+14+7, 0, sf::Color(255, 255, 255, 160), "second click -> select desirable resource.", 13);
+
+	//button Trade
+	addObject<Btn>("ButtonTrade", 1783, 236, 115, 44, 0,
+		sf::Color(89, 89, 89, 255), 2, sf::Color(142, 205, 246, 255),
+		sf::Color(103, 161, 199, 255), sf::Color(89, 89, 89, 255), sf::Color(255, 255, 255, 255),
+		sf::Color(213, 126, 3), sf::Color(89, 89, 89, 255), sf::Color(255, 255, 255, 255),
+		sf::Color(255, 255, 255, 255), "Trade", 17,
+		objButtonEvents::nextTurn);
+
+	//button Bank/port
+	addObject<Btn>("ButtonBankPort", 1783, 236+44+15, 115, 44, 0,
+		sf::Color(89, 89, 89, 255), 2, sf::Color(177, 177, 177, 255),
+		sf::Color(141, 141, 141, 255), sf::Color(89, 89, 89, 255), sf::Color(255, 255, 255, 255),
+		sf::Color(213, 126, 3), sf::Color(89, 89, 89, 255), sf::Color(255, 255, 255, 255),
+		sf::Color(255, 255, 255, 255), "Bank/port", 17,
+		objButtonEvents::nextTurn);
+
+	//button Clear Trade
+	addObject<Btn>("ButtonClearTrade", 1783, 236 + 44 + 15 +44 +15, 115, 44, 0,
+		sf::Color(255, 255, 255, 255), 2, sf::Color(177, 177, 177, 0),
+		sf::Color(255, 255, 255, 0), sf::Color(255, 255, 255, 255), sf::Color(255, 255, 255, 255),
+		sf::Color(213, 126, 3), sf::Color(89, 89, 89, 255), sf::Color(255, 255, 255, 255),
+		sf::Color(255, 255, 255, 255), "Clear trade", 17,
+		objButtonEvents::clearTrade);
 
 	if (catan->catan_ai->getPlayersCount() > 1) {
 		addObject<PlayerContainer>("PlayerContainer0", 1397 + 250, 3 + 644 + 98 / 2 + 3, kPlayerContainerWidth, 98);
@@ -64,8 +128,8 @@ void Board::Init()
 		addObject<Label>("LabelScore0", 1534 + 62, 13 + 3 + 644, 0, sf::Color(255, 255, 255, 255), "7", 18);
 		addObject<Label>("LabelScoreScore0", 1530, 14 + 3 + 644, 0, sf::Color(255, 255, 255, 255), "Score:", 18);
 
-		addObject<Label>("SoldRoadSetCities0", 1450, 45 + 3 + 644, 0, sf::Color(255, 255, 255, 255), "Soldiers:  3    Roads:  4    Settelments: 2    Cities:  4", 18);
-		addObject<Label>("ResDev0", 1450, 70 + 3 + 644, 0, sf::Color(255, 255, 255, 255), "Total res.:  3    Dev. cards:  4", 18);
+		addObject<Label>("SoldRoadSetCities0", 1410, 45 + 3 + 644, 0, sf::Color(255, 255, 255, 255), "Soldiers:  3    Roads:  4    Settelments: 2    Cities:  4", 18);
+		addObject<Label>("ResDev0", 1410, 70 + 3 + 644, 0, sf::Color(255, 255, 255, 255), "Total res.:  3    Dev. cards:  4", 18);
 	}
 	if (catan->catan_ai->getPlayersCount() > 2) {
 		addObject<PlayerContainer>("PlayerContainer1", 1397 + 250, 3 + 644 + 98 / 2 + 3 + 98 + 3, kPlayerContainerWidth, 98);
@@ -79,8 +143,8 @@ void Board::Init()
 		addObject<Label>("LabelScore1", 1534 + 62, 13 + 3 + 644 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "7", 18);
 		addObject<Label>("LabelScoreScore1", 1530, 14 + 3 + 644 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "Score:", 18);
 
-		addObject<Label>("SoldRoadSetCities1", 1450, 45 + 3 + 644 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "Soldiers:  3    Roads:  4    Settelments: 2    Cities:  4", 18);
-		addObject<Label>("ResDev1", 1450, 70 + 3 + 644 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "Total res.:  3    Dev. cards:  4", 18);
+		addObject<Label>("SoldRoadSetCities1", 1410, 45 + 3 + 644 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "Soldiers:  3    Roads:  4    Settelments: 2    Cities:  4", 18);
+		addObject<Label>("ResDev1", 1410, 70 + 3 + 644 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "Total res.:  3    Dev. cards:  4", 18);
 	}
 	if (catan->catan_ai->getPlayersCount() > 3) {
 		addObject<PlayerContainer>("PlayerContainer2", 1397+250, 3+644+98/2+3+98+98+3+3, kPlayerContainerWidth, 98);
@@ -94,17 +158,17 @@ void Board::Init()
 		addObject<Label>("LabelScore2", 1534 + 62, 13 + 3 + 644 + 3 + 98 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "7", 18);
 		addObject<Label>("LabelScoreScore2", 1530, 14 + 3 + 644 + 3 + 98 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "Score:", 18);
 
-		addObject<Label>("SoldRoadSetCities2", 1450, 45 + 3 + 644 + 3 + 98 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "Soldiers:  3    Roads:  4    Settelments: 2    Cities:  4", 18);
-		addObject<Label>("ResDev2", 1450, 70 + 3 + 644 + 3 + 98 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "Total res.:  3    Dev. cards:  4", 18);
+		addObject<Label>("SoldRoadSetCities2", 1410, 45 + 3 + 644 + 3 + 98 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "Soldiers:  3    Roads:  4    Settelments: 2    Cities:  4", 18);
+		addObject<Label>("ResDev2", 1410, 70 + 3 + 644 + 3 + 98 + 3 + 98, 0, sf::Color(255, 255, 255, 255), "Total res.:  3    Dev. cards:  4", 18);
 	}
 
 	//button next turn
-	addObject<Btn>("ButtonNextTurn", 1773+115/2, 595+44/2, 115, 44, 0,
+	addObject<Btn>("ButtonNextTurn", 1773 + 115 / 2, 595 + 44 / 2, 115, 44, 0,
 		sf::Color(89, 89, 89, 255), 2, sf::Color(142, 205, 246, 255),
 		sf::Color(103, 161, 199, 255), sf::Color(89, 89, 89, 255), sf::Color(255, 255, 255, 255),
 		sf::Color(213, 126, 3), sf::Color(89, 89, 89, 255), sf::Color(255, 255, 255, 255),
 		sf::Color(255, 255, 255, 255), "Done", 17,
-		objButtonEvents::nextTurn);	
+		objButtonEvents::nextTurn);
 
 	//Roads && Cities hooker
 
@@ -165,11 +229,14 @@ void Board::Init()
 }
 
 template<typename T1, typename ...Types>
-void Board::addObject(const std::string& name, Types&& ...args)
+//template<template <typename ...Types> typename T1, typename ...Types>
+Object* Board::addObject(const std::string& name, Types&& ...args)
 {
 	std::unique_ptr<T1> obj(new T1(name, std::forward<Types>(args)...));
+	auto result = obj.get();
 	auto inserted = Objects.insert(std::make_pair(Key(obj->getObjectId(), name), std::move(obj)));
-	assert(inserted.second);
+	assert(inserted.second);	
+	return result;
 }
 
 std::unique_ptr<Drag> Board::drag = std::unique_ptr<Drag>(new Drag());
@@ -182,19 +249,22 @@ Board::Board()
 Object * Board::GetObject(int x, int y) {
 
 	for (auto it = Objects.rbegin(); it != Objects.rend(); ++it) {
-		if (it->second->OnMouseOver(x, y)) {
+		if (auto obj = it->second->OnMouseOver(x, y)) {
 			
 			if (drag->IsDraggring()) {
-				if ((drag->get() == it->second.get()) || (!it->second->IsDragObjectAcceptable(drag->get()))) {
-					std::cout << "ID: " << it->second->getObjectId() << ", X = " << x << ", Y = " << y << std::endl;
+				//if ((drag->get() == it->second.get()) || (!it->second->IsDragObjectAcceptable(drag->get()))) {
+				if ((drag->get() == obj) || (!obj->IsDragObjectAcceptable(drag->get()))) {
+					//std::cout << "ID: " << it->second->getObjectId() << ", X = " << x << ", Y = " << y << std::endl;
+					std::cout << "ID: " << obj->getObjectId() << ", X = " << x << ", Y = " << y << std::endl;
 					//return nullptr;
 					continue;
 				}
 			}
 
-			std::cout << "ID: " << it->second->getObjectId() << ", X = " << x << ", Y = " << y << std::endl;
+			std::cout << "ID: " << obj->getObjectId() << ", X = " << x << ", Y = " << y << std::endl;
 
-			return &(*it->second);
+			//return &(*it->second);
+			return obj;
 		}
 	}
 	return nullptr;
@@ -233,7 +303,7 @@ void Board::Update()
 
 void Board::handleMouseEvent(sf::Event event)
 {
-	objUnderCursor = Board::GetObject(catan->mouse.x, catan->mouse.y);
+	objUnderCursor = GetObject(catan->mouse.x, catan->mouse.y);
 
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (objUnderCursor != nullptr) {

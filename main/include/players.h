@@ -26,15 +26,17 @@ public:
 
 	const int id;							//player id
 	
-	int GetResourceCount(resource res) const{ return (resources[res]); };
+	unsigned GetResourceCount(resource res) const{ return (resources[static_cast<int>(res)]); };
+	int GetTotalResourceCount() const { return (std::accumulate(std::begin(resources), std::end(resources), 0)); };
 
 	int GetActiveCard(devCard card) const { return (active_cards[static_cast<int>(card)]); };	//cards are ready to use
 	int GetUsedCard(devCard card) const { return (used_cards[static_cast<int>(card)]); };		//used dev card
 	int GetCards(devCard card) const { return (cards[static_cast<int>(card)]); };				//already bought, but not ready to use (this turn)
+	int GetAllClosedDevCardsCount() const { return (std::accumulate(std::begin(cards), std::end(cards), 0)
+		+ std::accumulate(std::begin(active_cards), std::end(active_cards), 0)); };				//count of all not played cards
 	
 	int GetTotalCardCount(devCard card) const;
-	int GetTotalCardsCount() const;
-	
+	int GetTotalCardsCount() const;	
 
 	int GetBuildingScore() const 
 		{ return (settlements_used * kSettelmentScore + cities_used * kCityScore); };
@@ -76,7 +78,7 @@ public:
 	int GetLargestArmyId() const { return (largest_army_id); };
 	int GetLargestRoadId() const { return (longest_road_id); };
 	int GetPlayersCount() const { return (static_cast<int>(players.size())); };
-	int GetPlayerScore(int id) const;
+	int GetPlayerScore(int id, bool addWinningScore) const;			//addWinningScore if TRUE then we add hidden player cards
 
 	void LoadPlayers(const std::vector <_Player> & _players);
 	void SetLargestArmyId(int id) { largest_army_id = id; };

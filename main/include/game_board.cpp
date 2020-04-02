@@ -4,7 +4,7 @@
 void AiGameBoard::clearHarbors()
 {
 	for (auto &harbor : harbors) {
-		harbor = non;
+		harbor = resource::non;
 	}
 }
 
@@ -25,7 +25,7 @@ void AiGameBoard::genNewHexes()
 	{
 		int current_hex = hexSequence[random_int][i];
 
-		if (res[current_hex] == non) {
+		if (res[current_hex] == resource::non) {
 			dices[current_hex] = 0;
 			continue;
 		}
@@ -59,11 +59,10 @@ void AiGameBoard::setHarborResource(unsigned int point, resource res)
 }
 
 //0..5, harbor_stone..harbor_wood
-void AiGameBoard::setBorderType(unsigned int border_pos, unsigned int border_type)
+void AiGameBoard::setBorderType(int border_pos, resource border_type)
 {
 	for (auto j = 0; j < 5; j++) {
-		setHarborResource(harborPoints[border_pos*5 + j],
-			static_cast<resource>(harborResources[border_type*5 + j]));
+		setHarborResource(harborPoints[border_pos*5 + j], harborResources[static_cast<int>(border_type)*5 + j]);
 	}
 }
 

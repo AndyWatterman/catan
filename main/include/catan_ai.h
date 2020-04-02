@@ -4,6 +4,7 @@
 #include "game_board.h"
 #include "game_state.h"
 #include "buildings.h"
+#include "players.h"
 //#include "header.h"
 
 class CatanAi : public AiGameBoard {
@@ -20,7 +21,8 @@ public:
 	std::unique_ptr<GameState> game_state;
 
 	const int getPlayersCount() const;
-	const int getCurrentPlayer() const;	
+	const int getCurrentPlayerId() const;
+	Player* getCurrentPlayer();
 
 	void nextTurn();
 };

@@ -62,7 +62,7 @@ public:
 	std::unique_ptr<Buildings> buildings;
 	std::unique_ptr<Players> players;
 
-	int GetCurrentPlayer() const;
+	int GetCurrentPlayerId() const;
 	void LoadGameState(const Sample & s);
 	void nextTurn();
 };

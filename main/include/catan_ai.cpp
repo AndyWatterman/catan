@@ -14,9 +14,15 @@ const int CatanAi::getPlayersCount() const
 	return (game_state->players->GetPlayersCount());
 }
 
-const int CatanAi::getCurrentPlayer() const
+const int CatanAi::getCurrentPlayerId() const
 {
-	return (game_state->GetCurrentPlayer());
+	return (game_state->GetCurrentPlayerId());
+}
+
+Player* CatanAi::getCurrentPlayer()
+{
+	return (&(*game_state->players)[getCurrentPlayerId()]);
+	//Player* p = &(*game_state->players)[getCurrentPlayerId()];
 }
 
 /*Building * CatanAi::getBuilding(int point) const

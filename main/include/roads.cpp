@@ -69,7 +69,7 @@ DFSTracePathPoints::DFSTracePathPoints(const GameState & parent, int _pID) :
 	pGameState(parent), roads(*pGameState.roads), buildings(*pGameState.buildings)
 {
 	if (_pID < 0) {
-		pID = pGameState.GetCurrentPlayer();
+		pID = pGameState.GetCurrentPlayerId();
 	}
 	else {
 		pID = _pID;

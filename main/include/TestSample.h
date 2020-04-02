@@ -32,20 +32,19 @@ Sample TestSample {
 	{ {
 		//Player 0
 		{
-			/*sheep, stone, brick, wood, weat*/
-			//{ 7, 1, 5, 0, 0 },	//стартовые ресурсы
-			{ 0, 1, 0, 1, 1 },	//стартовые ресурсы
+			//wood, brick, sheep, weat, stone		
+			{ 0, 3, 0, 5, 12 },	//стартовые ресурсы
 
 			/*knight, monopoly, roads, twoRes, winPoint*/
 			{ 0, 0, 0, 0, 0 },	//стартовые карточки игроков
-			{ 0, 0, 0, 0, 0 },	//активные карты
+			{ 1, 0, 0, 0, 0 },	//активные карты
 			{ 0, 0, 0, 0, 0 },	//использованные карты	
 			false				//dev_card_has_been_played
 		},
 
 		//Player 1
 		{
-			//sheep, stone, brick, wood, weat
+			//wood, brick, sheep, weat, stone
 			{ 1, 0, 1, 1, 0 },	//стартовые ресурсы
 
 								//knight, monopoly, roads, twoRes, winPoint
@@ -57,8 +56,21 @@ Sample TestSample {
 
 		//Player 3
 		{
-			//sheep, stone, brick, wood, weat
+			//wood, brick, sheep, weat, stone
 			{ 0, 0, 2, 2, 2 },	//стартовые ресурсы
+
+			//knight, monopoly, roads, twoRes, winPoint
+			{ 0, 0, 0, 0, 0 },	//стартовые карточки игроков
+			{ 2, 0, 0, 0, 0 },	//активные карты
+			{ 0, 0, 0, 0, 0 },	//использованные карты
+			false				//dev_card_has_been_played
+			//0, 0				//big_army, long_road
+		},
+
+		//Player 4
+		{
+			//wood, brick, sheep, weat, stone
+			{ 6, 0, 3, 1, 4 },	//стартовые ресурсы
 
 			//knight, monopoly, roads, twoRes, winPoint
 			{ 0, 0, 0, 0, 0 },	//стартовые карточки игроков

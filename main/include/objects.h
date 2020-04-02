@@ -42,7 +42,7 @@ public:
 	virtual void OnMouseDown(int x, int y, sf::Mouse::Button button);
 	virtual void OnMouseLeave();
 	virtual void OnMouseMove();
-	virtual bool OnMouseOver(float x, float y);	//check if mouse is on the object
+	virtual Object* OnMouseOver(float x, float y);	//check if mouse is on the object
 	virtual void OnMouseUp(sf::Mouse::Button button);	
 
 	virtual bool OnDragDrop(Object* obj);
@@ -79,8 +79,28 @@ public:
 	void UseTextureForDrop(bool enable);	//using global bounds or texture
 	virtual bool IsTextureUsedForDrop() const;
 
-	virtual bool OnMouseOver(float x, float y) override;	//if mouse on the object
+	virtual Object* OnMouseOver(float x, float y) override;	//if mouse on the object
 	virtual void OnDraw() override;
+};
+
+class CheckBox : public Rectangl {
+public:
+	CheckBox(const std::string& name, sf::Color OutlineColor, sf::Color FillColor, float x, float y);
+	CheckBox() = delete;
+
+	mutable bool isChecked = true;
+	void setCheckState(bool state = true) const;	
+
+	void OnMouseDown(int x, int y, sf::Mouse::Button button) override;
+	void OnMouseLeave() override;
+	void OnMouseUp(sf::Mouse::Button button) override;
+
+	void OnDraw() override;
+
+private:
+	bool isPressed = false;
+	sf::Sprite checkSprite = catan->GetSprite(Sprites::ID::check);
+
 };
 
 class BoardHex : public Rectangl {
@@ -165,24 +185,57 @@ private:
 		PressedOutlineColor, PressedTextColor;
 	std::string text;
 
+	std::vector <std::any> params;
+
 public:
+	template <typename ...Args>
 	Btn(const std::string& name, float x, float y, int width, int height, float angle,
 		const sf::Color& OutlineColor, float OutlineThickness, const sf::Color& FillColor,
 		const sf::Color& HoverFillColor, const sf::Color& HoverOutlineColor, const sf::Color& HoverTextColor,
 		const sf::Color& PressedFillColor, const sf::Color& PressedOutlineColor, const sf::Color& PressedTextColor,
-		const sf::Color &textColor, const std::string& text, int textSize, objButtonEvents event);
+		const sf::Color& textColor, const std::string& text, int textSize, objButtonEvents event, Args&& ...args)
+
+		: Rectangl(name, BoardObjects::button, OutlineColor, OutlineThickness, FillColor, x, y, width, height, angle),
+		OutlineColor(OutlineColor), FillColor(FillColor), textColor(textColor),
+		HoverFillColor(HoverFillColor), HoverOutlineColor(HoverOutlineColor), HoverTextColor(HoverTextColor),
+		PressedFillColor(PressedFillColor), PressedOutlineColor(PressedOutlineColor), PressedTextColor(PressedTextColor),
+		text(text), event(event)
+	
+		{
+			//std::tuple<Args...> tuple_ = std::tuple<Args...>(args...);
+			//std::vector<std::any> a = { args... };
+
+			params = std::vector<std::any>({ args... });
+			//int b = std::any_cast<int>(params[0]);
+
+			caption.setFont(catan->getFont());
+			caption.setString(text);
+			caption.setCharacterSize(textSize);
+			caption.setFillColor(textColor);
+
+			const sf::FloatRect bounds(caption.getLocalBounds());
+			caption.setOrigin(bounds.width / 2, bounds.height / 2 + bounds.top);
+			caption.setPosition(x, y);
+		};
 
 	void setBtnState(btnStates state);
 
-	void OnMouseDown(int x, int y, sf::Mouse::Button button) override;	
+	void OnMouseDown(int x, int y, sf::Mouse::Button button) override;
 	void OnMouseLeave() override;
 	void OnMouseMove() override;
 	void OnMouseUp(sf::Mouse::Button button) override;
 
 	void OnDraw() override;
 
-	static void processBtnEvent(objButtonEvents event);
+	//template <typename ...Args>
+		static void processBtnEvent(objButtonEvents event, const std::vector<std::any>& params);
 };
+
+/*template<typename ...Args>
+Btn<...Args>::Btn(const std::string& name, float x, float y, int width, int height, float angle, const sf::Color& OutlineColor, float OutlineThickness, const sf::Color& FillColor, const sf::Color& HoverFillColor, const sf::Color& HoverOutlineColor, const sf::Color& HoverTextColor, const sf::Color& PressedFillColor, const sf::Color& PressedOutlineColor, const sf::Color& PressedTextColor, const sf::Color& textColor, const std::string& text, int textSize, objButtonEvents event, Args&& ...args)
+{
+}*/
+
 
 class Label : public Object, public sf::Text {
 protected:
@@ -194,6 +247,32 @@ public:
 
 	virtual void OnDraw() override;
 };
+
+class ControlTradeResource : public Rectangl {
+public:
+	ControlTradeResource(const std::string& name, Sprites::ID spriteId, resource resType, float x, float y);
+
+	void Reset();
+	
+	void OnMouseDown(int x, int y, sf::Mouse::Button button) override;
+	void OnMouseLeave() override;
+	void OnMouseUp(sf::Mouse::Button button) override;
+	Object* OnMouseOver(float x, float y) override;
+	virtual void OnDraw() override;
+
+	ControlTradeResource operator++(int);
+
+private:
+	bool isSelected = false;
+
+	//which resources for trading has bee selected
+	//selectedTrade: 0 - none, 1 - resource to exchange, 2 - desirable resource
+	unsigned int selectedTrade = 0, resourceCount = 0;
+	Label lFromTo, lResourceCount;
+	Btn addButton;
+	resource tradeResource;
+};
+
 
 class BoardBuilding : public Rectangl {
 public:

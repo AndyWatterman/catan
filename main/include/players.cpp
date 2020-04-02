@@ -79,11 +79,15 @@ void Player::RestoreDevCard()
 	dev_card_has_been_played = false;
 }
 
-int Players::GetPlayerScore(int id) const
+int Players::GetPlayerScore(int id, bool addWinningScore = false) const
 {
 	int score = players[id].GetBuildingScore();
 	if (GetLargestArmyId() == id) { score += kLargestArmyBonus; };
 	if (GetLargestRoadId() == id) { score += kLongestRoadBonus; };
+	if (addWinningScore) {
+		//winPoints are always active, so we need to add only active cards
+		score += players[id].GetActiveCard(devCard::winPoint);
+	}
 	return (score);
 }
 
