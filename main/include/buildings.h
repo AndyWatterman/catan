@@ -24,6 +24,8 @@ public:
 	building_types GetBuildingType(int point) const;
 	std::tuple<int, int> GetFirstTwoBuildings(int id) const;
 
+	std::unique_ptr<std::vector<Building*>> GetAllBuildings(int id = -1);
+
 	Building* getBuilding(int point);
 
 	void LoadBuildings(const std::vector <Building> & _buildings);

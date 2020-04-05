@@ -89,8 +89,8 @@ void Board::Init()
 	addObject<ControlTradeResource>("TradeControl3", Sprites::ID::wheatCard, resource::weat, 1443 + 41 + 11 + 41 + 11 + 41 + 11, 303);		//wheat
 	addObject<ControlTradeResource>("TradeControl4", Sprites::ID::stoneCard, resource::stone, 1443 + 41 + 11 + 41 + 11 + 41 + 11 + 41 + 11, 303);		//stone
 
-	addObject<Label>("SelResToTrade", 1420, 392, 0, sf::Color(255, 255, 255, 160), "Hint: first click on res. - select for trading, ", 13);
-	addObject<Label>("SelResToTrade", 1420, 390+14+7, 0, sf::Color(255, 255, 255, 160), "second click -> select desirable resource.", 13);
+	addObject<Label>("SelResToTrade", 1420, 392, 0, sf::Color(255, 255, 255, 160), "Hint: click on resource icon to select for", 13);
+	addObject<Label>("SelResToTrade", 1420, 390+14+7, 0, sf::Color(255, 255, 255, 160), "trading (desired resource)", 13);
 
 	//button Trade
 	addObject<Btn>("ButtonTrade", 1783, 236, 115, 44, 0,
@@ -106,7 +106,7 @@ void Board::Init()
 		sf::Color(141, 141, 141, 255), sf::Color(89, 89, 89, 255), sf::Color(255, 255, 255, 255),
 		sf::Color(213, 126, 3), sf::Color(89, 89, 89, 255), sf::Color(255, 255, 255, 255),
 		sf::Color(255, 255, 255, 255), "Bank/port", 17,
-		objButtonEvents::nextTurn);
+		objButtonEvents::bankPortExchange);
 
 	//button Clear Trade
 	addObject<Btn>("ButtonClearTrade", 1783, 236 + 44 + 15 +44 +15, 115, 44, 0,
@@ -294,7 +294,7 @@ void Board::Update()
 {
 	for (auto it = Objects.begin(); it != Objects.end(); ++it)
 	{
-		if (!(it->second->IsHidden())) {
+		if (it->second->IsActive()) {
 			it->second->Update();
 		}
 	}

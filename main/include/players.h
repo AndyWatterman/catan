@@ -10,7 +10,7 @@ struct _Player {
 	bool dev_card_has_been_played = false;		//have we played dev card this turn?
 };
 
-class Player : private _Player {
+class Player : public _Player {
 private:
 	int max_road_length = 0,				//max road length		
 		roads_used = 0,
@@ -27,7 +27,7 @@ public:
 	const int id;							//player id
 	
 	unsigned GetResourceCount(resource res) const{ return (resources[static_cast<int>(res)]); };
-	int GetTotalResourceCount() const { return (std::accumulate(std::begin(resources), std::end(resources), 0)); };
+	int GetTotalResourceCount() const { return (std::accumulate(std::begin(resources), std::end(resources), 0)); };	
 
 	int GetActiveCard(devCard card) const { return (active_cards[static_cast<int>(card)]); };	//cards are ready to use
 	int GetUsedCard(devCard card) const { return (used_cards[static_cast<int>(card)]); };		//used dev card
@@ -35,8 +35,8 @@ public:
 	int GetAllClosedDevCardsCount() const { return (std::accumulate(std::begin(cards), std::end(cards), 0)
 		+ std::accumulate(std::begin(active_cards), std::end(active_cards), 0)); };				//count of all not played cards
 	
-	int GetTotalCardCount(devCard card) const;
-	int GetTotalCardsCount() const;	
+	int GetTotalCardCount(devCard card) const;		//specific card
+	//int GetTotalCardsCount() const;					//all cards
 
 	int GetBuildingScore() const 
 		{ return (settlements_used * kSettelmentScore + cities_used * kCityScore); };

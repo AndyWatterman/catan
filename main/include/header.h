@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 
 #define DEBUG 1
 
@@ -27,17 +27,21 @@ const int kHex_to_points = 6;	//number of points on one hex
 const int kMaxPlayerCount = 6;	//temporary players count const
 const int kHexCount = 19;	//temporary players count const
 
-const int kMaxSettelments = 5;			//максимальное количество поселений одного игрока
-const int kMaxCities = 4;				//максимальное количество городов одного игрока
-const int kMaxRoads = 15;				//максимальное количество дорог у одного игрока
+const int kMaxSettelments = 5;			//Г¬Г ГЄГ±ГЁГ¬Г Г«ГјГ­Г®ГҐ ГЄГ®Г«ГЁГ·ГҐГ±ГІГўГ® ГЇГ®Г±ГҐГ«ГҐГ­ГЁГ© Г®Г¤Г­Г®ГЈГ® ГЁГЈГ°Г®ГЄГ 
+const int kMaxCities = 4;				//Г¬Г ГЄГ±ГЁГ¬Г Г«ГјГ­Г®ГҐ ГЄГ®Г«ГЁГ·ГҐГ±ГІГўГ® ГЈГ®Г°Г®Г¤Г®Гў Г®Г¤Г­Г®ГЈГ® ГЁГЈГ°Г®ГЄГ 
+const int kMaxRoads = 15;				//Г¬Г ГЄГ±ГЁГ¬Г Г«ГјГ­Г®ГҐ ГЄГ®Г«ГЁГ·ГҐГ±ГІГўГ® Г¤Г®Г°Г®ГЈ Гі Г®Г¤Г­Г®ГЈГ® ГЁГЈГ°Г®ГЄГ 
 
-const int kResCount = 5;				//количество рзновидностей ресурсов в игре
-const int kCardCount = 5;				//количество рзновидностей карт развития в игре
-const int kMaxBankResources = 19;		//максимальное количество каждого из ресурсов в игре
+const int kResCount = 5;				//ГЄГ®Г«ГЁГ·ГҐГ±ГІГўГ® Г°Г§Г­Г®ГўГЁГ¤Г­Г®Г±ГІГҐГ© Г°ГҐГ±ГіГ°Г±Г®Гў Гў ГЁГЈГ°ГҐ
+const int kCardCount = 5;				//ГЄГ®Г«ГЁГ·ГҐГ±ГІГўГ® Г°Г§Г­Г®ГўГЁГ¤Г­Г®Г±ГІГҐГ© ГЄГ Г°ГІ Г°Г Г§ГўГЁГІГЁГї Гў ГЁГЈГ°ГҐ
+const int kMaxBankResources = 19;		//Г¬Г ГЄГ±ГЁГ¬Г Г«ГјГ­Г®ГҐ ГЄГ®Г«ГЁГ·ГҐГ±ГІГўГ® ГЄГ Г¦Г¤Г®ГЈГ® ГЁГ§ Г°ГҐГ±ГіГ°Г±Г®Гў Гў ГЁГЈГ°ГҐ
 
-const int kMinLongestPath = 5;			//минимальная длина пути, чтобы получить очки
-const int kLargestArmyBonus = 2;		//бонус за самое большое войско
-const int kLongestRoadBonus = 2;		//бонус за самое большое войско
+const int kMaxBankExchangePrice = 4;
+const int k3in1ExchangePrice = 3;
+const int kResourceHarborExchangePrice = 2;
+
+const int kMinLongestPath = 5;			//Г¬ГЁГ­ГЁГ¬Г Г«ГјГ­Г Гї Г¤Г«ГЁГ­Г  ГЇГіГІГЁ, Г·ГІГ®ГЎГ» ГЇГ®Г«ГіГ·ГЁГІГј Г®Г·ГЄГЁ
+const int kLargestArmyBonus = 2;		//ГЎГ®Г­ГіГ± Г§Г  Г±Г Г¬Г®ГҐ ГЎГ®Г«ГјГёГ®ГҐ ГўГ®Г©Г±ГЄГ®
+const int kLongestRoadBonus = 2;		//ГЎГ®Г­ГіГ± Г§Г  Г±Г Г¬Г®ГҐ ГЎГ®Г«ГјГёГ®ГҐ ГўГ®Г©Г±ГЄГ®
 const int kSettelmentScore = 1;
 const int kCityScore = 2;
 
@@ -46,16 +50,16 @@ const int kPlayerContainerHeight = 644;
 
 const std::string kFont = "Font\\RobotoSlab-Regular.ttf";
 
-//поселение/город
+//ГЇГ®Г±ГҐГ«ГҐГ­ГЁГҐ/ГЈГ®Г°Г®Г¤
 enum class building_types { settelment, city, none };
 
-//карты развития
+//ГЄГ Г°ГІГ» Г°Г Г§ГўГЁГІГЁГї
 enum class devCard {
-	knight,		//рыцарь
-	monopoly,	//монополия
-	roads,		//строительство 2-х дорог
-	twoRes,		//два любых ресурса из банка
-	winPoint,	//1 победное очко	
+	knight,		//Г°Г»Г¶Г Г°Гј
+	monopoly,	//Г¬Г®Г­Г®ГЇГ®Г«ГЁГї
+	roads,		//Г±ГІГ°Г®ГЁГІГҐГ«ГјГ±ГІГўГ® 2-Гµ Г¤Г®Г°Г®ГЈ
+	twoRes,		//Г¤ГўГ  Г«ГѕГЎГ»Гµ Г°ГҐГ±ГіГ°Г±Г  ГЁГ§ ГЎГ Г­ГЄГ 
+	winPoint,	//1 ГЇГ®ГЎГҐГ¤Г­Г®ГҐ Г®Г·ГЄГ®	
 };
 
 const std::array<sf::Color, kMaxPlayerCount> kPlayerColors = {
@@ -296,20 +300,41 @@ enum class BoardObjects : unsigned int {
 };
 
 
-enum class btnStates: unsigned int {normal = 0, hover, pressed};
-enum class objButtonEvents: unsigned int {genHexes = 0, nextTurn, addResource, nothing, clearTrade};
+/* knight, monopoly, roads, twoRes, winPoint */
+const std::array<int, kCardCount> max_dev_cards{
+	14, 2, 2, 2, 5
+};
 
-//typedef void(*pSetPosition)(const sf::Vector2f& position);
-//typedef const sf::Vector2f& (*pGetPosition)();
+enum class btnStates: unsigned int {normal = 0, hover, pressed};
+enum class objButtonEvents: unsigned int {genHexes = 0, nextTurn, addResource, nothing, clearTrade, bankPortExchange};
 
 //typedef int node[kMaxConnections];
 typedef std::array<int, kMaxConnections> node;
 
-//каждому гексу принадлежит 6 точек
+//ГЄГ Г¦Г¤Г®Г¬Гі ГЈГҐГЄГ±Гі ГЇГ°ГЁГ­Г Г¤Г«ГҐГ¦ГЁГІ 6 ГІГ®Г·ГҐГЄ
 typedef std::array<int, kHex_to_points> hex_point;
 
-//ресурсы и порты в игре, где tin1 - порт 3:1, non - отсутствие ресурса (для гексов без ресурса)
+//Г°ГҐГ±ГіГ°Г±Г» ГЁ ГЇГ®Г°ГІГ» Гў ГЁГЈГ°ГҐ, ГЈГ¤ГҐ tin1 - ГЇГ®Г°ГІ 3:1, non - Г®ГІГ±ГіГІГ±ГІГўГЁГҐ Г°ГҐГ±ГіГ°Г±Г  (Г¤Г«Гї ГЈГҐГЄГ±Г®Гў ГЎГҐГ§ Г°ГҐГ±ГіГ°Г±Г )
 enum class resource { wood, brick, sheep, weat, stone, non, tin1 };
+
+//construction and buying objects
+enum class construction_and_buying_objects {
+	c_road = 0,
+	c_settelment,
+	c_city,
+	c_dev_card
+};
+
+//cost of construction and buying objects
+const unsigned kPricesCount = 4;
+const std::array<std::array<int, kResCount>, kPricesCount> costAndBuyingPrices
+{ {
+		/*wood, brick, sheep, weat, stone*/
+		{1, 1, 0, 0, 0},	//c_road
+		{1, 1, 1, 1, 0},	//c_settelment
+		{0, 0, 0, 2, 3},	//c_city
+		{0, 0, 1, 1, 1}		//c_dev_card
+	} };
 
 //standart dices for 4ppl board
 const int kStandartDiceSequence = 18;
@@ -374,6 +399,7 @@ class GameState;
 class Roads;
 class Players;
 class Buildings;
+class Bank;
 struct _Board;
 struct Sample;
 

@@ -327,6 +327,45 @@ void Btn::processBtnEvent(objButtonEvents event, const std::vector<std::any>& pa
 
 			break;
 		}
+
+		case objButtonEvents::bankPortExchange: {
+
+			std::array<ControlTradeResource*, kResCount> ctrHolder;
+			for (auto i = 0; i < kResCount; i++)				
+				ctrHolder[i] = static_cast<ControlTradeResource*>(catan->board->GetObjectByName("TradeControl" + std::to_string(i)));
+
+			std::array<int, kResCount> exchange_cost{};			
+			unsigned necessary_res = 0;
+
+			for (auto i = 0; i < kResCount; i++) {				
+				if (!(ctrHolder[i]->isSelectedForTrade)) {
+					exchange_cost[i] += *ctrHolder[i];
+				}
+				else {
+					necessary_res += *ctrHolder[i];
+				}
+			}
+
+			auto res = catan->catan_ai->game_state->howManyResourcesWeCanGetUsingPort(exchange_cost);
+
+			//we pay equal resources (exchange_cost) to obtain (necessary_res)
+
+			if ((res == necessary_res) && (res != 0) && (necessary_res !=0)) {
+				auto& player_resources = catan->catan_ai->getCurrentPlayer().resources;
+				for (auto i = 0; i < kResCount; i++) {
+					if (!(ctrHolder[i]->isSelectedForTrade)) {
+						player_resources[i] -= *ctrHolder[i];
+					}
+					else {
+						player_resources[i] += *ctrHolder[i];
+					}
+				}
+				for (auto i = 0; i < kResCount; i++)
+					static_cast<ControlTradeResource*>(catan->board->GetObjectByName("TradeControl" + std::to_string(i)))->Reset();
+			}
+			
+			break;
+		}
     }
 }
 
@@ -519,11 +558,6 @@ void Rectangl::OnDraw()
 	catan->GetWindow().draw(*this);
 }
 
-/*void PlayerContainer::Update()
-{
-	setFillColor(kPlayerColors[catan->catan_ai->getCurrentPlayer()]);
-}*/
-
 Label::Label(const std::string& name, float x, float y, double angle, const sf::Color& textColor, const std::string& text, unsigned int textSize)
 	: Object(name, BoardObjects::label)
 {	
@@ -567,9 +601,40 @@ void BoardBuilding::Update()
 	Sprites::ID sp;
 	if (type == building_types::settelment) {
 		sp = Sprites::ID::redSet;
+		
+		auto isItPossibleToBuildSellelment = 
+			catan->catan_ai->game_state->CheckPossibilityOfBuyingOrBuilding(
+				costAndBuyingPrices[static_cast<int>(construction_and_buying_objects::c_settelment)]);
+
+		/*auto isItPossibleToBuildSellelment =
+			catan->catan_ai->game_state->CheckPossibilityOfBuyingOrBuilding(
+				costAndBuyingPrices[static_cast<int>(construction_and_buying_objects::c_settelment)], true);*/
+
+		if (!isItPossibleToBuildSellelment) {
+			this->Hide();
+		}
+		else {
+			if (!catan->board->drag->IsDraggring())
+				this->Show();
+		}
 	}
 	else {
 		sp = Sprites::ID::redCity;
+		auto isItPossibleToBuildCity =
+			catan->catan_ai->game_state->CheckPossibilityOfBuyingOrBuilding(
+				costAndBuyingPrices[static_cast<int>(construction_and_buying_objects::c_city)]);
+
+		/*auto isItPossibleToBuildCity =
+			catan->catan_ai->game_state->CheckPossibilityOfBuyingOrBuilding(
+				costAndBuyingPrices[static_cast<int>(construction_and_buying_objects::c_city)], true);*/
+
+		if (!isItPossibleToBuildCity) {
+			this->Hide();
+		}
+		else {
+			if (!catan->board->drag->IsDraggring())
+				this->Show();
+		}
 	}
 	setSpriteID(static_cast<Sprites::ID>(static_cast<unsigned int>(sp) + catan->catan_ai->getCurrentPlayerId()));
 }
@@ -642,6 +707,21 @@ bool buildingHooks::OnDragDrop(Object* obj)
 				if (bType == building_types::city)
 					catan->catan_ai->game_state->buildings->UpgradeBuilding(point);
 
+				//decrement resources after buying an object
+				if (objType != BoardObjects::buildingHooks) {					
+					construction_and_buying_objects setOrCity;
+					if (bType == building_types::settelment) {
+						setOrCity = construction_and_buying_objects::c_settelment;
+					}
+					else {
+						setOrCity = construction_and_buying_objects::c_city;
+					}
+					auto isItPossibleToBuildHere =
+						catan->catan_ai->game_state->CheckPossibilityOfBuyingOrBuilding(
+							costAndBuyingPrices[static_cast<int>(setOrCity)]);
+					catan->catan_ai->getCurrentPlayer().resources = (*isItPossibleToBuildHere)[0];
+				}
+
 				return (true);
 			}
 	}
@@ -677,8 +757,7 @@ void buildingHooks::OnDragOver(Object* obj)
 		|| ((bType == building_types::settelment) && (building == nullptr) && (!catan->catan_ai->game_state->buildings->IsThereBuildingsAround(point)) && (catan->catan_ai->game_state->roads->IsRoadPointExists(point)))
 		|| (objType == BoardObjects::buildingHooks)
 		|| ((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) || (sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)))) {
-		{
-				//Rectangl* rect = dynamic_cast<Rectangl*>(obj);
+		{				
 				setSpriteID(sp);
 				setFillColor(sf::Color(255, 255, 255, 255));
 				obj->Hide();
@@ -701,6 +780,20 @@ void buildingHooks::OnMouseLeave()
 bool buildingHooks::OnEndDrag(bool accepted)
 {
 	if (catan->mouse.x > 1100) {
+
+		//return spent resources
+		auto b = catan->catan_ai->game_state->buildings->getBuilding(point);		
+		auto& pRes = ((*catan->catan_ai->game_state->players.get())[b->id].resources);
+		std::array<int, kResCount> add_res;
+		if (b->type == building_types::settelment) {			
+			add_res = costAndBuyingPrices[static_cast<int>(construction_and_buying_objects::c_settelment)];
+		}
+		else {
+			add_res = costAndBuyingPrices[static_cast<int>(construction_and_buying_objects::c_city)];
+		}
+		std::transform(pRes.begin(), pRes.end(), add_res.begin(), pRes.begin(), std::plus<int>());
+
+		//delete settelment
 		catan->catan_ai->game_state->buildings->DeleteSettelement(point);
 	}
 	else {
@@ -753,6 +846,18 @@ bool BoardRoad::OnEndDrag(bool accepted)
 void BoardRoad::Update()
 {
 	setSpriteID(static_cast<Sprites::ID>(static_cast<int>(Sprites::ID::redRoad) + catan->catan_ai->getCurrentPlayerId()));
+
+	auto isItPossibleToBuildSellelment =
+		catan->catan_ai->game_state->CheckPossibilityOfBuyingOrBuilding(
+			costAndBuyingPrices[static_cast<int>(construction_and_buying_objects::c_road)]);
+
+	if (!isItPossibleToBuildSellelment) {
+		this->Hide();
+	}
+	else {
+		if (!catan->board->drag->IsDraggring())
+			this->Show();
+	}
 }
 
 roadHooks::roadHooks(const std::string& name, float x, float y, double angle)
@@ -818,6 +923,14 @@ bool roadHooks::OnDragDrop(Object* obj)
 		_roads->DeleteRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1]);
 		_roads->AddRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1], newRoadPlayerId);
 
+		//decrement resources after buying an object
+		if (objType != BoardObjects::roadHooks) {			
+			auto isItPossibleToBuildHere =
+				catan->catan_ai->game_state->CheckPossibilityOfBuyingOrBuilding(
+					costAndBuyingPrices[static_cast<int>(construction_and_buying_objects::c_road)]);
+			catan->catan_ai->getCurrentPlayer().resources = (*isItPossibleToBuildHere)[0];
+		}
+
 		return true;
 	}	
 
@@ -872,6 +985,14 @@ void roadHooks::OnMouseLeave()
 bool roadHooks::OnEndDrag(bool accepted)
 {
 	if (catan->mouse.x > 1100) {
+
+		//return spent resources
+		auto b = catan->catan_ai->game_state->roads->getRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1]);		
+		auto& pRes = ((*catan->catan_ai->game_state->players.get())[b->id].resources);
+		std::array<int, kResCount> add_res;		
+		add_res = costAndBuyingPrices[static_cast<int>(construction_and_buying_objects::c_road)];
+		std::transform(pRes.begin(), pRes.end(), add_res.begin(), pRes.begin(), std::plus<int>());
+
 		catan->catan_ai->game_state->roads->DeleteRoad(road_id_to_from_to[road_id][0], road_id_to_from_to[road_id][1]);
 	}
 	else {
@@ -1127,7 +1248,7 @@ void ControlTradeResource::Reset()
 	resourceCount = 0;	
 
 	setOutlineColor(sf::Color(255, 255, 255, 0));
-	selectedTrade = 0;
+	isSelectedForTrade = false;
 	lFromTo.Hide();
 }
 
@@ -1144,26 +1265,20 @@ void ControlTradeResource::OnMouseLeave()
 void ControlTradeResource::OnMouseUp(sf::Mouse::Button button)
 {
 	if (isSelected) {
-		switch (selectedTrade)
-		{
-		case 0:
-			setOutlineColor(sf::Color(255, 255, 255, 255));
-			selectedTrade++;
-			lFromTo.setString("FROM");
+
+		if (!isSelectedForTrade) {
+			setOutlineColor(sf::Color(255, 255, 255, 255));		
+			lFromTo.setString("NEED");
+			isSelectedForTrade = true;
+			if (resourceCount == 0)
+				resourceCount = 1;
 			lFromTo.Show();
-			break;
-
-		case 1:
-			setOutlineColor(sf::Color(228, 0, 255, 255));
-			selectedTrade++;
-			lFromTo.setString("   TO");
-			break;
-
-		default:
+		}
+		else {
 			setOutlineColor(sf::Color(255, 255, 255, 0));
-			selectedTrade = 0;		
-			lFromTo.Hide();
-			break;
+			isSelectedForTrade = false;
+			resourceCount = 0;
+			lFromTo.Hide();			
 		}
 
 		isSelected = false;
@@ -1181,7 +1296,7 @@ Object* ControlTradeResource::OnMouseOver(float x, float y)
 
 ControlTradeResource::ControlTradeResource(const std::string& name, Sprites::ID spriteId, resource resType, float x, float y)
 	: Rectangl(name, BoardObjects::icon, spriteId, x, y, 41, 62, 0), 
-	lFromTo(name, x-14, y+35, 0, sf::Color(255, 255, 255, 255), "FROM", 11),
+	lFromTo(name, x-14, y+35, 0, sf::Color(255, 255, 255, 255), "NEED", 11),
 	lResourceCount(name, x-17, y-35, 0, sf::Color(255, 255, 255, 255), "0", 33),
 	addButton("BtnAdd", x+1, 368, 25, 25, 0,
 		sf::Color(255, 255, 255, 255), 2, sf::Color(0, 0, 0, 0),
@@ -1208,9 +1323,14 @@ void ControlTradeResource::OnDraw()
 
 ControlTradeResource ControlTradeResource::operator++(int)
 {
-	Player* p = catan->catan_ai->getCurrentPlayer();
- 	if (p->GetResourceCount(tradeResource) > resourceCount) {
+	Player& p = catan->catan_ai->getCurrentPlayer();
+ 	if ((p.GetResourceCount(tradeResource) > resourceCount) || ((isSelectedForTrade) && (resourceCount < kMaxBankResources))) {
 		resourceCount++;
 	}	
 	return *this;
+}
+
+ControlTradeResource::operator int()
+{
+	return (resourceCount);	
 }

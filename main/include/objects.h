@@ -202,11 +202,8 @@ public:
 		text(text), event(event)
 	
 		{
-			//std::tuple<Args...> tuple_ = std::tuple<Args...>(args...);
-			//std::vector<std::any> a = { args... };
-
 			params = std::vector<std::any>({ args... });
-			//int b = std::any_cast<int>(params[0]);
+
 
 			caption.setFont(catan->getFont());
 			caption.setString(text);
@@ -227,15 +224,8 @@ public:
 
 	void OnDraw() override;
 
-	//template <typename ...Args>
-		static void processBtnEvent(objButtonEvents event, const std::vector<std::any>& params);
+	static void processBtnEvent(objButtonEvents event, const std::vector<std::any>& params);
 };
-
-/*template<typename ...Args>
-Btn<...Args>::Btn(const std::string& name, float x, float y, int width, int height, float angle, const sf::Color& OutlineColor, float OutlineThickness, const sf::Color& FillColor, const sf::Color& HoverFillColor, const sf::Color& HoverOutlineColor, const sf::Color& HoverTextColor, const sf::Color& PressedFillColor, const sf::Color& PressedOutlineColor, const sf::Color& PressedTextColor, const sf::Color& textColor, const std::string& text, int textSize, objButtonEvents event, Args&& ...args)
-{
-}*/
-
 
 class Label : public Object, public sf::Text {
 protected:
@@ -261,13 +251,15 @@ public:
 	virtual void OnDraw() override;
 
 	ControlTradeResource operator++(int);
+	operator int();
+
+	bool isSelectedForTrade = false;
 
 private:
 	bool isSelected = false;
 
-	//which resources for trading has bee selected
-	//selectedTrade: 0 - none, 1 - resource to exchange, 2 - desirable resource
-	unsigned int selectedTrade = 0, resourceCount = 0;
+	//which resources for trading has bee selected	
+	unsigned resourceCount = 0;
 	Label lFromTo, lResourceCount;
 	Btn addButton;
 	resource tradeResource;

@@ -104,6 +104,21 @@ std::tuple<int, int> Buildings::GetFirstTwoBuildings(int id) const
 	return temp;
 }
 
+std::unique_ptr<std::vector<Building*>> Buildings::GetAllBuildings(int id)
+{
+	if (id < 0)
+		id = pGameState->GetCurrentPlayerId();
+	
+	std::unique_ptr<std::vector<Building*>> arr(new std::vector<Building*>());
+	for (auto& building : buildings) {	
+		if (building.id == id) {			
+			arr->push_back(&building);
+		}
+	}
+
+	return arr;
+}
+
 Building * Buildings::getBuilding(int point)
 {
 	for (auto &building : buildings) {

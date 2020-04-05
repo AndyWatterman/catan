@@ -10,7 +10,7 @@ struct Sample {
 	int robber, largest_army, longest_path;
 	std::vector<Building> buildings;
 	std::vector<Road> roads;
-	std::vector<_Player> players;
+	std::vector<_Player> players;	
 };
 
 class player_int {
@@ -56,13 +56,22 @@ public:
 	GameState(CatanAi &parent);
 	GameState() = delete;
 
+	void LoadGameState(const Sample& s);
+
 	CatanAi &parent;
 
 	std::unique_ptr<Roads> roads;
 	std::unique_ptr<Buildings> buildings;
 	std::unique_ptr<Players> players;
+	std::unique_ptr<Bank> bank;
 
-	int GetCurrentPlayerId() const;
-	void LoadGameState(const Sample & s);
+	//all variants how we can spend cost
+	std::unique_ptr<std::vector<std::array<int, kResCount>>> CheckPossibilityOfBuyingOrBuilding(const std::array<int, kResCount>& cost, bool exchange_res = false, int pId = -1);
+
+	//how many resources we can get paying cost
+	unsigned howManyResourcesWeCanGetUsingPort(const std::array<int, kResCount>& cost, int pId = -1);
+	bool checkIfExchangeWasSuccessfull(const std::array<int, kResCount>& cost);
+
+	int GetCurrentPlayerId() const;	
 	void nextTurn();
 };

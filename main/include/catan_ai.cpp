@@ -19,9 +19,9 @@ const int CatanAi::getCurrentPlayerId() const
 	return (game_state->GetCurrentPlayerId());
 }
 
-Player* CatanAi::getCurrentPlayer()
+Player& CatanAi::getCurrentPlayer()
 {
-	return (&(*game_state->players)[getCurrentPlayerId()]);
+	return ((*game_state->players.get())[getCurrentPlayerId()]);
 	//Player* p = &(*game_state->players)[getCurrentPlayerId()];
 }
 

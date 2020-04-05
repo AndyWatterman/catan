@@ -66,6 +66,9 @@
     <ClInclude Include="include\TestSample.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\bank.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -102,6 +105,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="include\roads.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\bank.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -5,6 +5,7 @@
 #include "game_state.h"
 #include "buildings.h"
 #include "players.h"
+#include "bank.h"
 //#include "header.h"
 
 class CatanAi : public AiGameBoard {
@@ -22,7 +23,7 @@ public:
 
 	const int getPlayersCount() const;
 	const int getCurrentPlayerId() const;
-	Player* getCurrentPlayer();
+	Player& getCurrentPlayer();
 
 	void nextTurn();
 };

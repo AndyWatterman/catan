@@ -6,14 +6,14 @@ int Player::GetTotalCardCount(devCard card) const
 	return (cards[static_cast<int>(card)] + active_cards[static_cast<int>(card)] + used_cards[static_cast<int>(card)]);
 }
 
-int Player::GetTotalCardsCount() const
+/*int Player::GetTotalCardsCount() const
 {
 	int total_cards = 0;
 	for (int i = 0; i < kCardCount; i++) {
 		total_cards += cards[i] + active_cards[i] + used_cards[i];
 	}
 	return 0;
-}
+}*/
 
 int Player::GetMaxRoadLength() const
 {

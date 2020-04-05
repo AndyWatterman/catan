@@ -6,14 +6,14 @@ Sample TestSample {
 	//std::vector<Building> buildings;
 	{ {
 		{ 19, 0, building_types::settelment },
-		{ 28, 0, building_types::settelment },
-		{ 44, 0, building_types::city },
-		{ 8, 1, building_types::settelment },
-		{ 31, 1, building_types::settelment }
+		{ 2, 0, building_types::settelment },
+		{ 43, 0, building_types::city }//,
+		//{ 8, 1, building_types::settelment },
+		//{ 31, 1, building_types::settelment }
 	} },
 	
 	//std::vector<Road> roads;
-	{ {
+	{/* {
 		{ 19, 25, 0 },
 		{ 28, 34, 0 },
 		{ 34, 29, 0 },
@@ -27,37 +27,37 @@ Sample TestSample {
 		{ 5, 2, 1 },
 		{ 2, 6, 1 },
 		{ 31, 25, 1 }
-	} },
+	} */},
 
 	{ {
 		//Player 0
 		{
 			//wood, brick, sheep, weat, stone		
-			{ 0, 3, 0, 5, 12 },	//стартовые ресурсы
+			{ 4, 1, 5, 1, 0 },	//стартовые ресурсы
 
 			/*knight, monopoly, roads, twoRes, winPoint*/
-			{ 0, 0, 0, 0, 0 },	//стартовые карточки игроков
-			{ 1, 0, 0, 0, 0 },	//активные карты
-			{ 0, 0, 0, 0, 0 },	//использованные карты	
+			{ 0, 0, 0, 0, 0 },	//cards
+			{ 1, 0, 0, 0, 0 },	//active cards
+			{ 0, 0, 0, 0, 0 },	//used cards
 			false				//dev_card_has_been_played
 		},
 
 		//Player 1
 		{
 			//wood, brick, sheep, weat, stone
-			{ 1, 0, 1, 1, 0 },	//стартовые ресурсы
+			{ 0, 0, 0, 0, 0 },	//стартовые ресурсы
 
-								//knight, monopoly, roads, twoRes, winPoint
-			{ 0, 0, 0, 0, 0 },	//стартовые карточки игроков
-			{ 0, 0, 0, 0, 0 },	//активные карты
-			{ 0, 0, 0, 0, 0 },	//использованные карты
+			//knight, monopoly, roads, twoRes, winPoint
+			{ 0, 0, 0, 0, 0 },	//cards
+			{ 0, 0, 0, 0, 0 },	//active cards
+			{ 0, 0, 0, 0, 0 },	//used cards
 			false				//dev_card_has_been_played								
 		},
 
 		//Player 3
 		{
 			//wood, brick, sheep, weat, stone
-			{ 0, 0, 2, 2, 2 },	//стартовые ресурсы
+			{ 0, 0, 0, 0, 0 },	//стартовые ресурсы
 
 			//knight, monopoly, roads, twoRes, winPoint
 			{ 0, 0, 0, 0, 0 },	//стартовые карточки игроков
@@ -70,7 +70,7 @@ Sample TestSample {
 		//Player 4
 		{
 			//wood, brick, sheep, weat, stone
-			{ 6, 0, 3, 1, 4 },	//стартовые ресурсы
+			{ 0, 0, 0, 0, 0 },	//стартовые ресурсы
 
 			//knight, monopoly, roads, twoRes, winPoint
 			{ 0, 0, 0, 0, 0 },	//стартовые карточки игроков
